@@ -1,0 +1,8 @@
+sql -L dbs34_c/dbs34_c@//oracle19c.in.htwg-konstanz.de:1521/ora19c.in.fhkn.de/ora19c
+
+host: oracle19c.in.htwg-konstanz.de;
+port: 1521;
+SID: ora19c;
+user: dbs34_c;
+service: ora19c.in.fhkn.de;
+pwd: dbs34_c;

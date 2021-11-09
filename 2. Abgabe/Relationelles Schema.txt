@@ -1,0 +1,15 @@
+Legende:	
+AK: Alternate Key (Alternativschlüssel)
+FK: Foreign Key (Fremdschlüssel)
+varchar(<X>): Zeichenkette mit max. X Zeichen
+char(<X>): Zeichenkette mit genau X Zeichen
+<Attribute> NOT NULL: Attribut muss einen Wert zugeordnet haben (darf keinen NULL-Wert annehmen)
+
+sch(Ferienwohnungen) = ({[Wohnungs-ID: integer, Größe (qm): decimal, Zimmerzahl: integer, Tagespreis: decimal, beschreibungstext: varchar(1024)]}, ?Ferienwohnungen)
+?Ferienwohnungen = { Größe (qm) NOT NULL, Zimmerzahl NOT NULL, Tagespreis NOT NULL}
+
+ sch(bietet) = ({[Wohnungs-ID: integer, Austattungsbeschreibung: varchar(256)]}, ?bietet)
+?bietet = {Wohnungs-ID NOT NULL, Austattungsbeschreibung NOT NULL}
+
+	
+

@@ -1,0 +1,8 @@
+
+#Binary file formats
+*.pdf
+*.docx
+*.xlsx
+#Query Output and Logs
+*/Results/*
+*.log
