@@ -10,54 +10,72 @@ VV: Valid Values
 
 */
 CREATE TABLE Laender
-    (ISOCode CHAR(2),
-    Landesname VARCHAR2(64) NOT NULL,
-    CONSTRAINT PK_Laender PRIMARY KEY (ISOCode),
-    CONSTRAINT AK_Landesname UNIQUE (Landesname)
+    (ISOCode CHAR(2)
+        CONSTRAINT PK_Laender PRIMARY KEY,
+    Landesname VARCHAR2(64)
+        NOT NULL
+        CONSTRAINT AK_Landesname UNIQUE
     );
-    
+
+
 /*Wegen Kreisreferenz zwischen Orte-Adressen-Flughaefen wird die Constraint
-FK_Orte_Flughafen anfangs disabled*/    
+FK_Orte_Flughafen erst später erstellt*/    
 CREATE TABLE Orte
-    (OrtsID INTEGER,
-    Ortsname VARCHAR2(128) NOT NULL,
-    Flughafen VARCHAR2(64) NOT NULL,
-    Land NOT NULL,
-    CONSTRAINT PK_Orte PRIMARY KEY (OrtsID),
-    CONSTRAINT FK_Orte_Laender FOREIGN KEY (Land) REFERENCES Laender(ISOCode)
+    (OrtsID INTEGER
+        CONSTRAINT PK_Orte PRIMARY KEY,
+    Ortsname VARCHAR2(128)
+        NOT NULL,
+    Flughafen VARCHAR2(64)
+        NOT NULL,
+    Land CHAR(2)
+        NOT NULL
+        CONSTRAINT FK_Orte_Laender REFERENCES Laender(ISOCode)
     );
-    
+
+   
 CREATE TABLE kalkulierte_Distanz
-    (Startpunkt,
-    Endpunkt,
-    kalkulierte_Distanz FLOAT DEFAULT NULL,
-    CONSTRAINT PK_kalkulierte_Distanz PRIMARY KEY (Startpunkt, Endpunkt),
-    CONSTRAINT FK_Startpunkt FOREIGN KEY (Startpunkt) REFERENCES Orte(OrtsID),
-    CONSTRAINT FK_Endpunkt FOREIGN KEY (Endpunkt) REFERENCES Orte(OrtsID)
+    (Startpunkt INTEGER
+        CONSTRAINT FK_Startpunkt REFERENCES Orte(OrtsID),
+    Endpunkt INTEGER
+        CONSTRAINT FK_Endpunkt REFERENCES Orte(OrtsID),
+    kalkulierte_Distanz FLOAT
+        DEFAULT NULL,
+    CONSTRAINT PK_kalkulierte_Distanz PRIMARY KEY (Startpunkt, Endpunkt)
     );
-/* Die kalkulierte Distanz ist als Distanz in km zu lesen. Da Länge als messbarer Wert typischerweise 
-von stetiger Natur wurde an dieser Stelle ein passender Gleitkommadatentyp gewählt. */
+
+
+COMMENT ON TABLE kalkulierte_Distanz IS'Die Distanz eines Punktes zu sich selbst sei als 0 anzunehmen. Implementierung erfolgt als ???
+Falls die Distanz zwischen zwei Punkten nicht bekannt ist, so ist diese als unbekannt null anzunehmen';
 COMMENT ON COLUMN kalkulierte_Distanz.kalkulierte_Distanz IS ' Die kalkulierte Distanz
 ist als Distanz in km zu lesen. Da Länge als messbarer Wert typischerweise 
 von stetiger Natur ist wurde an dieser Stelle ein passender Gleitkommadatentyp gewählt.';
+
+
 CREATE TABLE Adressen
-    (AdressID INTEGER,
-    Strasse VARCHAR2(64) NOT NULL,
-    Hausnummer VARCHAR2(4) NOT NULL,
-    PLZ VARCHAR2(10) NOT NULL,
-    OrtsID NOT NULL,
-    CONSTRAINT PK_Adressen PRIMARY KEY (AdressID),
-    CONSTRAINT FK_Adressen_Orte FOREIGN KEY (OrtsID) REFERENCES Orte(OrtsID)
+    (AdressID INTEGER
+        CONSTRAINT PK_Adressen PRIMARY KEY,
+    Strasse VARCHAR2(64)
+        NOT NULL,
+    Hausnummer VARCHAR2(4)
+        NOT NULL,
+    PLZ VARCHAR2(10)
+        NOT NULL,
+    OrtsID  INTEGER
+        NOT NULL
+        CONSTRAINT FK_Adressen_Orte REFERENCES Orte(ORTSID)
     );
-    
+
+
 CREATE TABLE Flughaefen
-    (Flughafenname VARCHAR2(64),
-    AdressID NOT NULL,
-    CONSTRAINT PK_Flughaefen PRIMARY KEY (Flughafenname),
-    CONSTRAINT FK_Flughafen_Adressen FOREIGN KEY (AdressID) REFERENCES Adressen(AdressID),
-    CONSTRAINT AK_Flughaefen_AdressID UNIQUE (AdressID)
+    (Flughafenname VARCHAR2(64)
+        CONSTRAINT PK_Flughaefen PRIMARY KEY,
+    AdressID INTEGER
+        NOT NULL
+        CONSTRAINT FK_Flughafen_Adressen REFERENCES Adressen(AdressID)
+        CONSTRAINT AK_Flughaefen_AdressID UNIQUE
     );
-    
+
+
 /* Scharfstellen der FK_Orte_Flughaefen Constraint, da Kreisreferenz nun behoben */   
 ALTER TABLE Orte
     ADD CONSTRAINT FK_Orte_Flughafen FOREIGN KEY (Flughafen) REFERENCES Flughaefen(Flughafenname);
@@ -66,117 +84,156 @@ circulären Dependenz zwischen den Relationen Orte, Adressen, Flughaefen erst nac
 Spezifikation dieser drei Relationen auch selbst spezifiziert.';
 
 
-
 CREATE TABLE Touristenattraktionen
-    (Name_der_Attraktion VARCHAR2(64),
-    Beschreibung VARCHAR2(256) NOT NULL,
-    AdressID NOT NULL,
-    CONSTRAINT PK_Touristenattraktionen PRIMARY KEY (Name_der_Attraktion),
-    CONSTRAINT FK_Touristenattraktionen_Adressen FOREIGN KEY (AdressID) REFERENCES Adressen(AdressID),
-    CONSTRAINT AK_Touristenattraktionen_AdressID UNIQUE (AdressID)
+    (Name_der_Attraktion VARCHAR2(64)
+        CONSTRAINT PK_Touristenattraktionen PRIMARY KEY,
+    Beschreibung VARCHAR2(256)
+        NOT NULL,
+    AdressID INTEGER
+        NOT NULL
+        CONSTRAINT FK_Touristenattraktionen_Adressen REFERENCES ADRESSEN(ADRESSID)
+        CONSTRAINT AK_Touristenattraktionen_AdressID UNIQUE
     );
-    
+
+
 CREATE TABLE Fluggesellschaften
-    (Gesellschaftsname VARCHAR2(64),
-    Rating INTEGER NOT NULL,
-    CONSTRAINT PK_Fluggesellschaften PRIMARY KEY (Gesellschaftsname),
-    CONSTRAINT VV_FluggesellschaftenRating CHECK (Rating BETWEEN 1 AND 10)
+    (Gesellschaftsname VARCHAR2(64)
+        CONSTRAINT PK_Fluggesellschaften PRIMARY KEY,
+    Rating INTEGER
+        NOT NULL
+        CONSTRAINT VV_FluggesellschaftenRating CHECK (Rating BETWEEN 1 AND 10)
     );
+
 
 CREATE TABLE wird_angeflogen
-    (Startflughafen,
-    Endflughafen,
-    Fluggesellschaft,
-    CONSTRAINT PK_wirdangeflogen PRIMARY KEY (Startflughafen, Endflughafen, Fluggesellschaft),
-    CONSTRAINT FK_Startflughafen FOREIGN KEY (Startflughafen) REFERENCES Flughaefen(Flughafenname),
-    CONSTRAINT FK_Endflughafen FOREIGN KEY (Endflughafen) REFERENCES Flughaefen(Flughafenname),
-    CONSTRAINT FK_Fluggesellschaft FOREIGN KEY (Fluggesellschaft) REFERENCES Fluggesellschaften(Gesellschaftsname)
+    (Startflughafen VARCHAR2(64)
+        CONSTRAINT FK_Startflughafen REFERENCES Flughaefen(Flughafenname),
+    Endflughafen VARCHAR2(64)
+        CONSTRAINT FK_Endflughafen REFERENCES Flughaefen(Flughafenname),
+    Fluggesellschaft VARCHAR2(64)
+        CONSTRAINT FK_Fluggesellschaft REFERENCES Fluggesellschaften(Gesellschaftsname),
+    CONSTRAINT PK_wirdangeflogen PRIMARY KEY (Startflughafen, Endflughafen, Fluggesellschaft)
     );
-    
+
+
 CREATE TABLE Ferienwohnungen
-    (WohnungsID INTEGER,
-     Größe NUMBER NOT NULL,
-     Zimmerzahl INTEGER NOT NULL,
-     Tagespreis NUMBER(20,4) NOT NULL,
-     Beschreibungstext VARCHAR2(1024) NOT NULL,
-     AdressID NOT NULL,
-     CONSTRAINT PK_Ferienwohnungen PRIMARY KEY (WohnungsID),
-     CONSTRAINT FK_Ferienwohnungen_Adressen FOREIGN KEY (AdressID) REFERENCES Adressen(AdressID),
-     CONSTRAINT AK_Ferienwohnungen_AdressID UNIQUE (AdressID)
+    (WohnungsID INTEGER
+        CONSTRAINT PK_Ferienwohnungen PRIMARY KEY,
+     Größe NUMBER
+        NOT NULL,
+     Zimmerzahl INTEGER
+        NOT NULL,
+     Tagespreis NUMBER(20,4)
+        NOT NULL,
+     Beschreibungstext VARCHAR2(1024)
+        NOT NULL,
+     AdressID INTEGER
+        NOT NULL
+        CONSTRAINT FK_Ferienwohnungen_Adressen REFERENCES Adressen(AdressID)
+        CONSTRAINT AK_Ferienwohnungen_AdressID UNIQUE
      );
 
+
 CREATE TABLE Zusatzaustattungen
-    (Beschreibung VARCHAR2(256),
-    CONSTRAINT PK_Zusatzaustattungen PRIMARY KEY (Beschreibung)
+    (Beschreibung VARCHAR2(256)
+        CONSTRAINT PK_Zusatzaustattungen PRIMARY KEY
     );    
-    
+
+
 CREATE TABLE bietet
-    (WohnungsID,
-    Ausstattungsbeschreibung,
-    CONSTRAINT PK_bietet PRIMARY KEY (WohnungsID, Ausstattungsbeschreibung),
-    CONSTRAINT FK_bietet_Ferienwohnungen FOREIGN KEY (WohnungsID) REFERENCES Ferienwohnungen(WohnungsID),
-    CONSTRAINT FK_bietet_Zusatzaustattungen FOREIGN KEY (Ausstattungsbeschreibung) REFERENCES
-    Zusatzaustattungen(Beschreibung)
+    (WohnungsID INTEGER
+        CONSTRAINT FK_bietet_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID),
+    Ausstattungsbeschreibung VARCHAR2(256)
+        CONSTRAINT FK_bietet_Zusatzaustattungen REFERENCES Zusatzaustattungen(Beschreibung),
+    CONSTRAINT PK_bietet PRIMARY KEY (WohnungsID, Ausstattungsbeschreibung)
     );
-    
+
+
 CREATE TABLE Bilder
-    (DateiID INTEGER,
-    Bildbeschreibung VARCHAR2(128) NOT NULL,
-    DateiPfad VARCHAR2(256) NOT NULL,
-    WohnungsID NOT NULL,
-    CONSTRAINT PK_Bilder PRIMARY KEY (DateiID),
-    CONSTRAINT FK_Bilder_Ferienwohnungen FOREIGN KEY (WohnungsID) REFERENCES Ferienwohnungen(WohnungsID)
+    (DateiID INTEGER
+        CONSTRAINT PK_Bilder PRIMARY KEY,
+    Bildbeschreibung VARCHAR2(128)
+        NOT NULL,
+    DateiPfad VARCHAR2(256)
+        NOT NULL,
+    WohnungsID INTEGER
+        NOT NULL
+        CONSTRAINT FK_Bilder_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID)
     );
-    
+
+
 CREATE TABLE Bankverbindungen
-    (IBAN CHAR(22),
-    BIC CHAR(11) NOT NULL,
-    Kontonummer CHAR(7) NOT NULL,
-    BLZ CHAR(8) NOT NULL,
-    CONSTRAINT PK_Bankverbindungen PRIMARY KEY (IBAN),
+    (IBAN CHAR(22)
+        CONSTRAINT PK_Bankverbindungen PRIMARY KEY,
+    BIC CHAR(11)
+        NOT NULL,
+    Kontonummer CHAR(7)
+        NOT NULL,
+    BLZ CHAR(8)
+        NOT NULL,
     CONSTRAINT AK_Bankverbindungen UNIQUE (Kontonummer, BLZ)
     );   
-    
-CREATE TABLE Kunden
-    (KundenID INTEGER,
-    Email VARCHAR2(64) NOT NULL,
-    Telefonnummer VARCHAR2(32) NOT NULL,
-    Geburtsdatum DATE NOT NULL,
-    Vorname VARCHAR2(32) NOT NULL, 
-    Nachname VARCHAR2(32) NOT NULL, 
-    AdressID NOT NULL,
-    IBAN NOT NULL,
-    CONSTRAINT PK_Kunden PRIMARY KEY (KundenID),
-    CONSTRAINT FK_Kunden_Adressen FOREIGN KEY (AdressID) REFERENCES Adressen(AdressID),
-    CONSTRAINT FK_Kunden_Bankverbindungen FOREIGN KEY (IBAN) REFERENCES Bankverbindungen(IBAN),
-    CONSTRAINT AK_Kunden_Email UNIQUE (Email),
-    CONSTRAINT AK_Kunden_IBAN UNIQUE (IBAN),
-    CONSTRAINT AK_Kunden_AdressID UNIQUE(AdressID)
-    );   
 
-CREATE TABLE Belegungen
-    (BelegungsNr INTEGER,
-    Buchungsdatum DATE NOT NULL,
-    Von DATE NOT NULL,
-    Bis DATE NOT NULL,
-    Buchungsstatus VARCHAR2(16) NOT NULL,
-    WohnungsID NOT NULL,
-    KundenID NOT NULL,
-    CONSTRAINT PK_Belegungen PRIMARY KEY (BelegungsNr),
-    CONSTRAINT FK_Belegungen_Ferienwohnungen FOREIGN KEY (WohnungsID) REFERENCES Ferienwohnungen(WohnungsID),
-    CONSTRAINT FK_Belegungen_Kunden FOREIGN KEY (KundenID) REFERENCES Kunden(KundenID)
+
+CREATE TABLE Kunden
+    (KundenID INTEGER
+        CONSTRAINT PK_Kunden PRIMARY KEY,
+    Email VARCHAR2(64)
+        NOT NULL
+        CONSTRAINT AK_Kunden_Email UNIQUE,
+    Telefonnummer VARCHAR2(32)
+        NOT NULL,
+    Geburtsdatum DATE
+        NOT NULL,
+    Vorname VARCHAR2(32)
+        NOT NULL, 
+    Nachname VARCHAR2(32)
+        NOT NULL, 
+    AdressID INTEGER
+        NOT NULL
+        CONSTRAINT FK_Kunden_Adressen REFERENCES Adressen(AdressID)
+        CONSTRAINT AK_Kunden_AdressID UNIQUE,
+    IBAN CHAR(22)
+        NOT NULL
+        CONSTRAINT FK_Kunden_Bankverbindungen REFERENCES Bankverbindungen(IBAN)
+        CONSTRAINT AK_Kunden_IBAN UNIQUE
     );
 
+
+CREATE TABLE Belegungen
+    (BelegungsNr INTEGER
+        CONSTRAINT PK_Belegungen PRIMARY KEY,
+    Buchungsdatum DATE
+        NOT NULL,
+    Von DATE
+        NOT NULL,
+    Bis DATE
+        NOT NULL,
+    Buchungsstatus VARCHAR2(16)
+        NOT NULL,
+    WohnungsID INTEGER
+        NOT NULL
+        CONSTRAINT FK_Belegungen_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID),
+    KundenID INTEGER
+        NOT NULL
+        CONSTRAINT FK_Belegungen_Kunden REFERENCES Kunden(KundenID)
+    );
+
+
 CREATE TABLE Rechnungen
-    (RechnungsNr INTEGER,
-    Rechnungsbetrag NUMBER(10,4) NOT NULL,
-    Rechnungsdatum DATE NOT NULL,
+    (RechnungsNr INTEGER
+        CONSTRAINT PK_Rechnungen PRIMARY KEY,
+    Rechnungsbetrag NUMBER(10,4)
+        NOT NULL,
+    Rechnungsdatum DATE
+        NOT NULL,
     Zahlungseingang DATE,
-    Rechnungsstatus VARCHAR2(16) NOT NULL,
-    BelegungsNr NOT NULL,
-    CONSTRAINT PK_Rechnungen PRIMARY KEY (RechnungsNr),
-    CONSTRAINT FK_Rechnungen_Belegungen FOREIGN KEY (BelegungsNr) REFERENCES Belegungen(BelegungsNr),
-    CONSTRAINT AK_Rechnungen_BelegungsNr UNIQUE (BelegungsNr),
-    CONSTRAINT VV_RechnungenRechnungstatus CHECK (Rechnungsstatus IN ('beglichen', 'offen'))
+    Rechnungsstatus VARCHAR2(16)
+        NOT NULL
+        CONSTRAINT VV_RechnungenRechnungstatus CHECK (Rechnungsstatus IN ('beglichen', 'offen')),
+    BelegungsNr INTEGER
+        NOT NULL
+        CONSTRAINT FK_Rechnungen_Belegungen REFERENCES Belegungen(BelegungsNr)
+        CONSTRAINT AK_Rechnungen_BelegungsNr UNIQUE
     );
 
