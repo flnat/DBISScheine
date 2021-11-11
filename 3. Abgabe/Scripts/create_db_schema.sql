@@ -6,9 +6,9 @@ PK: Primary-Key
 FK: Foreign-Key
 AK: Alternate-Key
 VV: Valid Values
-
-
 */
+
+
 CREATE TABLE Laender
     (ISOCode CHAR(2)
         CONSTRAINT PK_Laender PRIMARY KEY,
@@ -16,6 +16,7 @@ CREATE TABLE Laender
         NOT NULL
         CONSTRAINT AK_Landesname UNIQUE
     );
+/*Länder.ISOCode müssen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)
 
 
 /*Wegen Kreisreferenz zwischen Orte-Adressen-Flughaefen wird die Constraint
@@ -51,6 +52,7 @@ ist als Distanz in km zu lesen. Da Länge als messbarer Wert typischerweise
 von stetiger Natur ist wurde an dieser Stelle ein passender Gleitkommadatentyp gewählt.';
 
 
+/*Eine AdressID darf maximal entweder einer Wohnung, einem Kunden, einer Touristenattraktion oder einem Flughafen zugeordnet werden*/
 CREATE TABLE Adressen
     (AdressID INTEGER
         CONSTRAINT PK_Adressen PRIMARY KEY,
@@ -137,7 +139,7 @@ CREATE TABLE Ferienwohnungen
 CREATE TABLE Zusatzaustattungen
     (Beschreibung VARCHAR2(256)
         CONSTRAINT PK_Zusatzaustattungen PRIMARY KEY
-    );    
+    );
 
 
 CREATE TABLE bietet
@@ -160,6 +162,7 @@ CREATE TABLE Bilder
         NOT NULL
         CONSTRAINT FK_Bilder_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID)
     );
+/*Einer Ferienwohnung können maximal 4 Bilder zugeordnet werden*/
 
 
 CREATE TABLE Bankverbindungen
@@ -210,7 +213,8 @@ CREATE TABLE Belegungen
     Bis DATE
         NOT NULL,
     Buchungsstatus VARCHAR2(16)
-        NOT NULL,
+        NOT NULL
+        CONSTRAINT VV_Belegungen_Belegungsstatus CHECK (BUCHUNGSSTATUS IN ('Buchung', 'Reservierung')),
     WohnungsID INTEGER
         NOT NULL
         CONSTRAINT FK_Belegungen_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID),
@@ -218,6 +222,13 @@ CREATE TABLE Belegungen
         NOT NULL
         CONSTRAINT FK_Belegungen_Kunden REFERENCES Kunden(KundenID)
     );
+
+
+/* Es ist nur eine Umwandlung von unverbindlichen Reservierungen zu verbindlichen Buchungen möglich  */
+/* Die Belegungen einer Ferienwohnung dürfen sich nicht zeitlich überschneiden */
+
+
+/*Eine Belegung führt nach einer Woche zu einer Rechnung */
 
 
 CREATE TABLE Rechnungen
@@ -230,7 +241,7 @@ CREATE TABLE Rechnungen
     Zahlungseingang DATE,
     Rechnungsstatus VARCHAR2(16)
         NOT NULL
-        CONSTRAINT VV_RechnungenRechnungstatus CHECK (Rechnungsstatus IN ('beglichen', 'offen')),
+        CONSTRAINT VV_Rechnungen_Rechnungstatus CHECK (Rechnungsstatus IN ('beglichen', 'offen')),
     BelegungsNr INTEGER
         NOT NULL
         CONSTRAINT FK_Rechnungen_Belegungen REFERENCES Belegungen(BelegungsNr)
