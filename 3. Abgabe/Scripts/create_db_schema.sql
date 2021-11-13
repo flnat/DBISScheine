@@ -1,11 +1,10 @@
 ALTER SESSION SET NLS_DATE_FORMAT = 'DD.MM.YYYY';
-/*TODO: Sollten Typen bei FK mitdefiniert werden, ist eigentlich ja nicht notwendig */
 /*
 Legende für Abkürzungen
 PK: Primary-Key
 FK: Foreign-Key
 AK: Alternate-Key
-VV: Valid Values
+VV: Valid Values (für CHECK Constraints)
 */
 
 
@@ -16,7 +15,7 @@ CREATE TABLE Laender
         NOT NULL
         CONSTRAINT AK_Landesname UNIQUE
     );
-/*Länder.ISOCode müssen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)
+COMMENT ON COLUMN Laender.ISOCode IS 'Länder.ISOCode müssen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)';
 
 
 /*Wegen Kreisreferenz zwischen Orte-Adressen-Flughaefen wird die Constraint
@@ -40,19 +39,19 @@ CREATE TABLE kalkulierte_Distanz
     Endpunkt INTEGER
         CONSTRAINT FK_Endpunkt REFERENCES Orte(OrtsID),
     kalkulierte_Distanz FLOAT
-        DEFAULT NULL,
-    CONSTRAINT PK_kalkulierte_Distanz PRIMARY KEY (Startpunkt, Endpunkt)
+        NOT NULL
+        CONSTRAINT VV_kalkulierte_Distanz_positiv CHECK (kalkulierte_Distanz > 0),
+    CONSTRAINT PK_kalkulierte_Distanz PRIMARY KEY (Startpunkt, Endpunkt),
+    CONSTRAINT kalkulierte_Distanz_SP_ungleich_EP CHECK (Startpunkt <> Endpunkt)
     );
-
-
 COMMENT ON TABLE kalkulierte_Distanz IS'Die Distanz eines Punktes zu sich selbst sei als 0 anzunehmen. Implementierung erfolgt als ???
-Falls die Distanz zwischen zwei Punkten nicht bekannt ist, so ist diese als unbekannt null anzunehmen';
+Falls die Distanz zwischen zwei Punkten nicht bekannt ist, so ist diese als unbekannt null anzunehmen
+Die Distanz zwischen zwei beliebigen Punkten wird genau einmal gespeichert.';
 COMMENT ON COLUMN kalkulierte_Distanz.kalkulierte_Distanz IS ' Die kalkulierte Distanz
 ist als Distanz in km zu lesen. Da Länge als messbarer Wert typischerweise 
 von stetiger Natur ist wurde an dieser Stelle ein passender Gleitkommadatentyp gewählt.';
 
 
-/*Eine AdressID darf maximal entweder einer Wohnung, einem Kunden, einer Touristenattraktion oder einem Flughafen zugeordnet werden*/
 CREATE TABLE Adressen
     (AdressID INTEGER
         CONSTRAINT PK_Adressen PRIMARY KEY,
@@ -66,6 +65,8 @@ CREATE TABLE Adressen
         NOT NULL
         CONSTRAINT FK_Adressen_Orte REFERENCES Orte(ORTSID)
     );
+COMMENT ON COLUMN Adressen.AdressID IS 'Eine AdressID darf maximal
+entweder einer Wohnung, einem Kunden, einer Touristenattraktion oder einem Flughafen zugeordnet werden';
 
 
 CREATE TABLE Flughaefen
@@ -114,7 +115,8 @@ CREATE TABLE wird_angeflogen
         CONSTRAINT FK_Endflughafen REFERENCES Flughaefen(Flughafenname),
     Fluggesellschaft VARCHAR2(64)
         CONSTRAINT FK_Fluggesellschaft REFERENCES Fluggesellschaften(Gesellschaftsname),
-    CONSTRAINT PK_wirdangeflogen PRIMARY KEY (Startflughafen, Endflughafen, Fluggesellschaft)
+    CONSTRAINT PK_wirdangeflogen PRIMARY KEY (Startflughafen, Endflughafen, Fluggesellschaft),
+    CONSTRAINT wird_angeflogen_StartF_ungleich_Endf CHECK (Startflughafen <> Endflughafen)
     );
 
 
@@ -162,7 +164,7 @@ CREATE TABLE Bilder
         NOT NULL
         CONSTRAINT FK_Bilder_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID)
     );
-/*Einer Ferienwohnung können maximal 4 Bilder zugeordnet werden*/
+COMMENT ON TABLE Bilder IS 'Einer Ferienwohnung können maximal 4 Bilder zugeordnet werden';
 
 
 CREATE TABLE Bankverbindungen
@@ -220,7 +222,8 @@ CREATE TABLE Belegungen
         CONSTRAINT FK_Belegungen_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID),
     KundenID INTEGER
         NOT NULL
-        CONSTRAINT FK_Belegungen_Kunden REFERENCES Kunden(KundenID)
+        CONSTRAINT FK_Belegungen_Kunden REFERENCES Kunden(KundenID),
+    CONSTRAINT VV_Belegungen_Von_kleiner_Bis CHECK (Von <= Bis)
     );
 
 
@@ -235,6 +238,7 @@ CREATE TABLE Rechnungen
     (RechnungsNr INTEGER
         CONSTRAINT PK_Rechnungen PRIMARY KEY,
     Rechnungsbetrag NUMBER(10,4)
+    CONSTRAINT Rechnungen_Rechnungsbetrag_positiv CHECK (Rechnungsbetrag > 0)
         NOT NULL,
     Rechnungsdatum DATE
         NOT NULL,
@@ -245,6 +249,9 @@ CREATE TABLE Rechnungen
     BelegungsNr INTEGER
         NOT NULL
         CONSTRAINT FK_Rechnungen_Belegungen REFERENCES Belegungen(BelegungsNr)
-        CONSTRAINT AK_Rechnungen_BelegungsNr UNIQUE
+        CONSTRAINT AK_Rechnungen_BelegungsNr UNIQUE,
+    CONSTRAINT Rechnungen_Zahlungseingang_nach_Rechnungseingang CHECK(ZAHLUNGSEINGANG >= RECHNUNGSDATUM)
     );
 
+/*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage größer als 
+das Buchungsdatum. Implementierung erfolgt später.*/

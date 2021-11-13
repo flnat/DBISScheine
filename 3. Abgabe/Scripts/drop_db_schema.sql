@@ -8,9 +8,8 @@ DROP TABLE Zusatzaustattungen;
 DROP TABLE Ferienwohnungen;
 
 DROP TABLE Touristenattraktionen;
-/* TODO: Warum funktioniert DISABLE CONSTRAINT nicht -->Fragen wann welche Methodik
-möglich*/
-/*Entferne die  */
+
+/*Entferne die FK Constraint FK_Orte_Flughafen um die circuläre Referenz zu deaktivieren und somit die DDL Statements erfolgreich durchzuführen  */
 ALTER TABLE Orte DROP CONSTRAINT FK_Orte_Flughafen;
 DROP TABLE wird_angeflogen;
 DROP TABLE Fluggesellschaften;
