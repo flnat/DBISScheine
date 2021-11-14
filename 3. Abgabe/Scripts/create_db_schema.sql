@@ -238,7 +238,7 @@ CREATE TABLE Rechnungen
     (RechnungsNr INTEGER
         CONSTRAINT PK_Rechnungen PRIMARY KEY,
     Rechnungsbetrag NUMBER(10,4)
-    CONSTRAINT Rechnungen_Rechnungsbetrag_positiv CHECK (Rechnungsbetrag > 0)
+        CONSTRAINT Rechnungen_Rechnungsbetrag_positiv CHECK (Rechnungsbetrag > 0)
         NOT NULL,
     Rechnungsdatum DATE
         NOT NULL,
