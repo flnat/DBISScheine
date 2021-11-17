@@ -134,9 +134,13 @@ CREATE TABLE Ferienwohnungen
      AdressID INTEGER
         NOT NULL
         CONSTRAINT FK_Ferienwohnungen_Adressen REFERENCES Adressen(AdressID)
-        CONSTRAINT AK_Ferienwohnungen_AdressID UNIQUE
+        CONSTRAINT AK_Ferienwohnungen_AdressID UNIQUE,
+        CONSTRAINT VV_Ferienwohnungen_Tagespreis > 0,
+        CONSTRAINT VV_Ferienwohnungen_Größe > 0
      );
 
+COMMENT ON COLUMN Ferienwohnungen.Tagespreis IS 'Angabe in Euro';
+COMMENT ON COLUMN Ferienwohnungen.Größe IS 'Angabe in Quadratmeter';
 
 CREATE TABLE Zusatzaustattungen
     (Beschreibung VARCHAR2(256)
