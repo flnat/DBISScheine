@@ -3,6 +3,7 @@
 *.pdf
 *.docx
 *.xlsx
+*.zip
 #Query Output and Logs
 */Results/*
 *.log
