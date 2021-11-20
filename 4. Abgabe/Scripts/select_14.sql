@@ -1,3 +1,4 @@
+/*Abklären ob Ties erwünscht sind*/
 SELECT DISTINCT fg.GESELLSCHAFTSNAME AS Airline, fg.RATING,
 wa.STARTFLUGHAFEN AS Fremdflughafen, wa.ENDFLUGHAFEN AS Heimatflughafen
 FROM
@@ -17,4 +18,4 @@ WHERE
     fg.GESELLSCHAFTSNAME = wa.FLUGGESELLSCHAFT AND
     f.WohnungsID = &gegebeneWohnung
 ORDER BY fg.Rating DESC NULLS LAST
-FETCH FIRST 1 ROW ONLY
+FETCH FIRST 1 ROW WITH TIES
