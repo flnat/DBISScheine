@@ -1,5 +1,5 @@
 /*Selektiere alle Ferienwohnungen in Frankreich mit Schwimmbad die noch keine
-  Belegung haben
+  Reservierung haben
  */
 SELECT  f.WOHNUNGSID, o.ORTSNAME
 FROM
@@ -14,5 +14,6 @@ WHERE
     NOT EXISTS (
     SELECT 1
     FROM Belegungen b
-    WHERE b.WohnungsID = f.WohnungsID
+    WHERE b.WohnungsID = f.WohnungsID AND
+          b.BUCHUNGSSTATUS = 'Reservierung'
     )

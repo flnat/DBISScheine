@@ -1,21 +1,19 @@
 
-/*Selektiert die Buchungen*/
-
-SELECT
-    FERIENWOHNUNGEN.WOHNUNGSID, FERIENWOHNUNGEN.BESCHREIBUNGSTEXT, ORTE.ORTSNAME,
-    ADRESSEN.STRASSE, ADRESSEN.HAUSNUMMER
+/*Selektiert alle Ferienwohnungen in Frankreich mit einem Schwimmbad,
+  welche mindestens eine Reservierung haben
+ */
+SELECT f.WOHNUNGSID, o.ORTSNAME, COUNT(*) AS AnzahlBelegungen
 FROM
-    BELEGUNGEN, FERIENWOHNUNGEN, ADRESSEN, ORTE, LAENDER
+    Adressen a, Orte o, Laender l, bietet,
+    Ferienwohnungen f RIGHT OUTER JOIN Belegungen b
+        ON(f.WohnungsID = b.WohnungsID)
 WHERE
-    (FERIENWOHNUNGEN.WOHNUNGSID = BELEGUNGEN.WOHNUNGSID) AND
-    (FERIENWOHNUNGEN.ADRESSID = ADRESSEN.ADRESSID) AND
-    (ADRESSEN.ORTSID = ORTE.ORTSID) AND
-    (ORTE.LAND = LAENDER.ISOCODE) AND
-    (BELEGUNGEN.BUCHUNGSSTATUS = 'Reservierung') AND
-    (LAENDER.LANDESNAME = 'Frankreich')
-HAVING
-    COUNT(BELEGUNGEN.BELEGUNGSNR) > 1
-GROUP BY FERIENWOHNUNGEN.WOHNUNGSID, FERIENWOHNUNGEN.BESCHREIBUNGSTEXT, ORTE.ORTSNAME,
-    ADRESSEN.STRASSE, ADRESSEN.HAUSNUMMER
-ORDER BY COUNT(BELEGUNGEN.BELEGUNGSNR)
-;
+    f.AdressID = a.AdressID AND
+    a.OrtsID = o.OrtsID AND
+    o.Land = l.ISOCode AND
+    f.WohnungsID = bietet.WohnungsID AND
+    l.Landesname = 'Frankreich' AND
+    bietet.AUSSTATTUNGSBESCHREIBUNG = 'Schwimmbad' AND
+    b.BUCHUNGSSTATUS = 'Reservierung'
+GROUP BY f.WohnungsID, o.OrtsName
+ORDER BY COUNT(*) DESC

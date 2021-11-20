@@ -135,8 +135,8 @@ CREATE TABLE Ferienwohnungen
         NOT NULL
         CONSTRAINT FK_Ferienwohnungen_Adressen REFERENCES Adressen(AdressID)
         CONSTRAINT AK_Ferienwohnungen_AdressID UNIQUE,
-        CONSTRAINT VV_Ferienwohnungen_Tagespreis > 0,
-        CONSTRAINT VV_Ferienwohnungen_Größe > 0
+        CONSTRAINT VV_Ferienwohnungen_Tagespreis CHECK (Tagespreis > 0),
+        CONSTRAINT VV_Ferienwohnungen_Größe CHECK (Größe > 0)
      );
 
 COMMENT ON COLUMN Ferienwohnungen.Tagespreis IS 'Angabe in Euro';
