@@ -1,4 +1,5 @@
-SELECT DISTINCT fg.GESELLSCHAFTSNAME AS Airline, fg.RATING, wa.STARTFLUGHAFEN, wa.ENDFLUGHAFEN
+SELECT DISTINCT fg.GESELLSCHAFTSNAME AS Airline, fg.RATING,
+wa.STARTFLUGHAFEN AS Fremdflughafen, wa.ENDFLUGHAFEN AS Heimatflughafen
 FROM
     Ferienwohnungen f, Adressen a, Orte o, Laender l,
     Flughaefen fh, WIRD_ANGEFLOGEN wa, FLUGGESELLSCHAFTEN fg,
@@ -15,3 +16,4 @@ WHERE
     wa.STARTFLUGHAFEN = fh_fremd.FLUGHAFENNAME AND
     fg.GESELLSCHAFTSNAME = wa.FLUGGESELLSCHAFT AND
     f.WohnungsID = &gegebeneWohnung
+ORDER BY fg.Rating DESC NULLS LAST
