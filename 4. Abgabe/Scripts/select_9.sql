@@ -12,6 +12,5 @@ WHERE
     f.WohnungsID = bietet.WohnungsID AND
     l.isocode = 'TR' AND
     bietet.Ausstattungsbeschreibung = 'Schwimmbad' AND
-    ((b.VON BETWEEN '01.05.2016' AND '21.05.2016') OR
-    (b.BIS BETWEEN '01.05.2016' AND '21.05.2016'))
-
+    (b.VON NOT BETWEEN '01.05.2016' AND '21.05.2016') AND
+    (b.BIS NOT BETWEEN '01.05.2016' AND '21.05.2016')
