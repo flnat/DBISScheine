@@ -1,3 +1,13 @@
+DROP VIEW Reservierungen;
+DROP VIEW Buchungen;
+DROP VIEW Familienwohnungen;
+DROP VIEW UebersichtKunden;
+DROP VIEW Zahlungsstatus;
+DROP VIEW MidAgeKunden;
+
+
+
+
 DROP TABLE Rechnungen;
 DROP TABLE Belegungen;
 DROP TABLE Kunden;
