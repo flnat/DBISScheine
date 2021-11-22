@@ -284,4 +284,49 @@ CREATE VIEW Familienwohnungen AS
     WHERE f.Größe > 100
     WITH CHECK OPTION;
     
-    
+CREATE VIEW UebersichtKunden AS
+    SELECT
+        k.KundenID, k.Nachname, k.Vorname, k.Email,
+        bv.IBAN, bv.BIC,
+        o.OrtsName, a.Strasse, a.Hausnummer, a.PLZ,
+        b.BelegungsNr, b.Buchungsstatus, b.Buchungsdatum, b.Von, b.Bis,
+        CASE WHEN r.RechnungsNr IS NOT NULL THEN 'Rechnung wurde erstellt'
+        ELSE 'Es wurde noch keine Rechnung erstellt' END AS "Rechnungsstatus",
+        f.WohnungsID, f.Beschreibungstext
+    FROM
+        Kunden k LEFT OUTER JOIN Belegungen b
+            ON (k.KundenID = b.KundenID)
+        LEFT OUTER JOIN Rechnungen r
+            ON (b.BelegungsNr = r.BelegungsNr),
+        Bankverbindungen bv, ferienwohnungen f,
+        Rechnungen r, Adressen a, Orte o
+    WHERE
+        k.IBAN = bv.IBAN AND
+        b.WohnungsID = f.WohnungsID AND
+        k.AdressID = a.AdressID AND
+        a.OrtsID = o.OrtsID
+        ;
+CREATE VIEW Zahlungsstatus AS
+    SELECT b.BelegungsNr, f.WohnungsID, f.Beschreibungstext,
+    k.KundenID, k.Nachname, k.Vorname,
+    r.RechnungsNr, r.Rechnungsdatum, r.Rechnungsbetrag,
+    CASE WHEN r.ZAHLUNGSEINGANG IS NOT NULL THEN 'bezahlt' ELSE 'offen' END AS Zahlungsstatus,
+    r.ZAHLUNGSEINGANG
+    FROM
+        Belegungen b
+        LEFT JOIN Kunden k
+            ON k.KundenID = b.KundenID
+        LEFT JOIN Ferienwohnungen f
+            ON f.WohnungsID = b.WohnungsID
+        LEFT JOIN Rechnungen r
+            ON r.BelegungsNr = b.BelegungsNr
+    ORDER BY b.BelegungsNr, r.RechnungsNR ASC NULLS LAST        
+    ;
+CREATE VIEW MidAgeKunden AS
+    SELECT k.KundenID, K.Email, k.Telefonnummer, k.Geburtsdatum,
+    floor(months_between(sysdate, k.Geburtsdatum)/12) AS "Alter",
+    k.Vorname, k.Nachname, k.AdressID, k.IBAN
+    FROM Kunden k
+    WHERE
+        floor(months_between(sysdate, k.Geburtsdatum)/12) BETWEEN 30 AND 40
+    ;
