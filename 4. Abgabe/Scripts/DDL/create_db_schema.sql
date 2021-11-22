@@ -278,3 +278,10 @@ CREATE VIEW Buchungen AS(
     WHERE
         b.Buchungsstatus = 'Reservierung'
     );
+CREATE VIEW Familienwohnungen AS
+    SELECT f.*
+    FROM Ferienwohnungen f
+    WHERE f.Größe > 100
+    WITH CHECK OPTION;
+    
+    
