@@ -259,3 +259,22 @@ CREATE TABLE Rechnungen
 
 /*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage größer als 
 das Buchungsdatum. Implementierung erfolgt später.*/
+
+CREATE VIEW Buchungen AS(
+    SELECT
+        b.BelegungsNr AS BuchungsNr, b.Buchungsdatum, b.Von, b.Bis, b.WohnungsID, b.KundenID
+    FROM
+        Belegungen b
+    WHERE
+        b.Buchungsstatus = 'Buchung'
+    );
+
+CREATE VIEW Buchungen AS(
+    SELECT
+        b.BelegungsNr AS BuchungsNr, b.Buchungsdatum AS Reservierungsdatum,
+        b.Von, b.Bis, b.WohnungsID, b.KundenID
+    FROM
+        Belegungen b
+    WHERE
+        b.Buchungsstatus = 'Reservierung'
+    );
