@@ -269,7 +269,7 @@ CREATE VIEW Buchungen AS(
         b.Buchungsstatus = 'Buchung'
     );
 
-CREATE VIEW Buchungen AS(
+CREATE VIEW Reservierungen AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum AS Reservierungsdatum,
         b.Von, b.Bis, b.WohnungsID, b.KundenID
