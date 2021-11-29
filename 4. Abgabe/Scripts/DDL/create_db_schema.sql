@@ -1,10 +1,10 @@
 ALTER SESSION SET NLS_DATE_FORMAT = 'DD.MM.YYYY';
 /*
-Legende für Abkürzungen
+Legende fÃ¼r AbkÃ¼rzungen
 PK: Primary-Key
 FK: Foreign-Key
 AK: Alternate-Key
-VV: Valid Values (für CHECK Constraints)
+VV: Valid Values (fÃ¼r CHECK Constraints)
 */
 
 
@@ -15,11 +15,11 @@ CREATE TABLE Laender
         NOT NULL
         CONSTRAINT AK_Landesname UNIQUE
     );
-COMMENT ON COLUMN Laender.ISOCode IS 'Länder.ISOCode müssen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)';
+COMMENT ON COLUMN Laender.ISOCode IS 'LÃ¤nder.ISOCode mÃ¼ssen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)';
 
 
 /*Wegen Kreisreferenz zwischen Orte-Adressen-Flughaefen wird die Constraint
-FK_Orte_Flughafen erst später erstellt*/    
+FK_Orte_Flughafen erst spÃ¤ter erstellt*/    
 CREATE TABLE Orte
     (OrtsID INTEGER
         CONSTRAINT PK_Orte PRIMARY KEY,
@@ -48,8 +48,8 @@ COMMENT ON TABLE kalkulierte_Distanz IS'Die Distanz eines Punktes zu sich selbst
 Falls die Distanz zwischen zwei Punkten nicht bekannt ist, so ist diese als unbekannt null anzunehmen
 Die Distanz zwischen zwei beliebigen Punkten wird genau einmal gespeichert.';
 COMMENT ON COLUMN kalkulierte_Distanz.kalkulierte_Distanz IS ' Die kalkulierte Distanz
-ist als Distanz in km zu lesen. Da Länge als messbarer Wert typischerweise 
-von stetiger Natur ist wurde an dieser Stelle ein passender Gleitkommadatentyp gewählt.';
+ist als Distanz in km zu lesen. Da LÃ¤nge als messbarer Wert typischerweise 
+von stetiger Natur ist wurde an dieser Stelle ein passender Gleitkommadatentyp gewÃ¤hlt.';
 
 
 CREATE TABLE Adressen
@@ -83,7 +83,7 @@ CREATE TABLE Flughaefen
 ALTER TABLE Orte
     ADD CONSTRAINT FK_Orte_Flughafen FOREIGN KEY (Flughafen) REFERENCES Flughaefen(Flughafenname);
 COMMENT ON TABLE Orte IS 'Die FK-Constraint FK_Orte_Flughafen wird aufgrund einer 
-circulären Dependenz zwischen den Relationen Orte, Adressen, Flughaefen erst nach der vollständigen
+circulÃ¤ren Dependenz zwischen den Relationen Orte, Adressen, Flughaefen erst nach der vollstÃ¤ndigen
 Spezifikation dieser drei Relationen auch selbst spezifiziert.';
 
 
@@ -123,7 +123,7 @@ CREATE TABLE wird_angeflogen
 CREATE TABLE Ferienwohnungen
     (WohnungsID INTEGER
         CONSTRAINT PK_Ferienwohnungen PRIMARY KEY,
-     Größe NUMBER
+     Groesse NUMBER
         NOT NULL,
      Zimmerzahl INTEGER
         NOT NULL,
@@ -136,11 +136,11 @@ CREATE TABLE Ferienwohnungen
         CONSTRAINT FK_Ferienwohnungen_Adressen REFERENCES Adressen(AdressID)
         CONSTRAINT AK_Ferienwohnungen_AdressID UNIQUE,
         CONSTRAINT VV_Ferienwohnungen_Tagespreis CHECK (Tagespreis > 0),
-        CONSTRAINT VV_Ferienwohnungen_Größe CHECK (Größe > 0)
+        CONSTRAINT VV_Ferienwohnungen_Groesse CHECK (Groesse > 0)
      );
 
 COMMENT ON COLUMN Ferienwohnungen.Tagespreis IS 'Angabe in Euro';
-COMMENT ON COLUMN Ferienwohnungen.Größe IS 'Angabe in Quadratmeter';
+COMMENT ON COLUMN Ferienwohnungen.Groesse IS 'Angabe in Quadratmeter';
 
 CREATE TABLE Zusatzaustattungen
     (Beschreibung VARCHAR2(256)
@@ -168,7 +168,7 @@ CREATE TABLE Bilder
         NOT NULL
         CONSTRAINT FK_Bilder_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID)
     );
-COMMENT ON TABLE Bilder IS 'Einer Ferienwohnung können maximal 4 Bilder zugeordnet werden';
+COMMENT ON TABLE Bilder IS 'Einer Ferienwohnung kÃ¶nnen maximal 4 Bilder zugeordnet werden';
 
 
 CREATE TABLE Bankverbindungen
@@ -231,11 +231,11 @@ CREATE TABLE Belegungen
     );
 
 
-/* Es ist nur eine Umwandlung von unverbindlichen Reservierungen zu verbindlichen Buchungen möglich  */
-/* Die Belegungen einer Ferienwohnung dürfen sich nicht zeitlich überschneiden */
+/* Es ist nur eine Umwandlung von unverbindlichen Reservierungen zu verbindlichen Buchungen mÃ¶glich  */
+/* Die Belegungen einer Ferienwohnung dÃ¼rfen sich nicht zeitlich Ã¼berschneiden */
 
 
-/*Eine Belegung führt nach einer Woche zu einer Rechnung */
+/*Eine Belegung fÃ¼hrt nach einer Woche zu einer Rechnung */
 
 
 CREATE TABLE Rechnungen
@@ -257,8 +257,8 @@ CREATE TABLE Rechnungen
     CONSTRAINT Rechnungen_Zahlungseingang_nach_Rechnungseingang CHECK(ZAHLUNGSEINGANG >= RECHNUNGSDATUM)
     );
 
-/*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage größer als 
-das Buchungsdatum. Implementierung erfolgt später.*/
+/*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage grÃ¶ÃŸer als 
+das Buchungsdatum. Implementierung erfolgt spÃ¤ter.*/
 
 CREATE VIEW Buchungen AS(
     SELECT
@@ -281,7 +281,7 @@ CREATE VIEW Buchungen AS(
 CREATE VIEW Familienwohnungen AS
     SELECT f.*
     FROM Ferienwohnungen f
-    WHERE f.Größe > 100
+    WHERE f.Groesse > 100
     WITH CHECK OPTION;
     
 CREATE VIEW UebersichtKunden AS
