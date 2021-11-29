@@ -2,18 +2,16 @@
 /*Selektiert alle Ferienwohnungen in Frankreich mit einem Schwimmbad,
   welche mindestens eine Buchung haben
  */
-SELECT f.WOHNUNGSID, o.ORTSNAME, COUNT(*) AS AnzahlBelegungen
+SELECT f.WOHNUNGSID
 FROM
     Adressen a, Orte o, Laender l, bietet,
-    Ferienwohnungen f RIGHT OUTER JOIN Belegungen b
-        ON(f.WohnungsID = b.WohnungsID)
+    Belegungen b, Ferienwohnungen f
 WHERE
+    b.WohnungsID = f.WohnungsID AND
     f.AdressID = a.AdressID AND
     a.OrtsID = o.OrtsID AND
     o.Land = l.ISOCode AND
     f.WohnungsID = bietet.WohnungsID AND
     l.Landesname = 'Frankreich' AND
     bietet.AUSSTATTUNGSBESCHREIBUNG = 'Schwimmbad' AND
-    b.BUCHUNGSSTATUS = 'Buchung'
-GROUP BY f.WohnungsID, o.OrtsName
-ORDER BY COUNT(*) DESC
+    b.BUCHUNGSSTATUS = 'Buchung';

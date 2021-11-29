@@ -10,8 +10,9 @@ WHERE
     a.OrtSID = o.OrtsID AND
     o.Land = l.isocode AND
     f.WohnungsID = bietet.WohnungsID AND
-    l.isocode = 'TR' AND
+    l.Landesname = 'Türkei' AND
     bietet.Ausstattungsbeschreibung = 'Schwimmbad' AND
-    ((b.VON BETWEEN '01.05.2016' AND '21.05.2016') OR
+    ((b.Von < '01.05.2016' AND b.BIS > '21.05.2016') OR
+    (b.VON BETWEEN '01.05.2016' AND '21.05.2016') OR
     (b.BIS BETWEEN '01.05.2016' AND '21.05.2016'))
-
+;
