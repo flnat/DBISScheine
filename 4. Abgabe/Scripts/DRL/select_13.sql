@@ -1,19 +1,23 @@
-SELECT DISTINCT fg.GESELLSCHAFTSNAME AS Airline, fg.RATING,
+SELECT  fg.GESELLSCHAFTSNAME AS Airline, fg.RATING,
 wa.STARTFLUGHAFEN AS Fremdflughafen, wa.ENDFLUGHAFEN AS Heimatflughafen
-FROM
-    Ferienwohnungen f, Adressen a, Orte o, Laender l,
-    Flughaefen fh, WIRD_ANGEFLOGEN wa, FLUGGESELLSCHAFTEN fg,
-    Laender Ausland, FLughaefen fh_fremd, Orte o_fremd
-WHERE
+FROM Ferienwohnungen f, Adressen a, Orte o,
+    Flughaefen fh, WIRD_ANGEFLOGEN wa, FLUGGESELLSCHAFTEN fg
+WHERE 
     f.AdressID = a.AdressID AND
     a.OrtsID = o.OrtsID AND
-    o.Land = l.ISOCode AND
     o.FLUGHAFEN = fh.FLUGHAFENNAME AND
     wa.Endflughafen = o.FLUGHAFEN AND
-    Ausland.ISOCODE <> l.ISOCODE AND
-    o_fremd.LAND = Ausland.ISOCODE AND
-    o_fremd.FLUGHAFEN = fh_fremd.FLUGHAFENNAME AND
-    wa.STARTFLUGHAFEN = fh_fremd.FLUGHAFENNAME AND
     fg.GESELLSCHAFTSNAME = wa.FLUGGESELLSCHAFT AND
-    f.WohnungsID = &gegebeneWohnung
-ORDER BY fg.Rating DESC NULLS LAST
+    f.WohnungsID = &gegebeneWohnung AND
+    wa.Startflughafen IN 
+        (SELECT fh_fremd.Flughafenname
+        FROM Flughaefen fh_fremd
+        WHERE
+            NOT EXISTS(
+            SELECT fh_fremd.Flughafenname
+            FROM Orte InlandsOrte
+            WHERE
+                fh_fremd.Flughafenname = InlandsOrte.Flughafen AND
+                InlandsOrte.Land = o.Land
+                ))
+            
