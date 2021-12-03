@@ -1,10 +1,10 @@
 ALTER SESSION SET NLS_DATE_FORMAT = 'DD.MM.YYYY';
 /*
-Legende f√ºr Abk√ºrzungen
+Legende f¸r Abk¸rzungen
 PK: Primary-Key
 FK: Foreign-Key
 AK: Alternate-Key
-VV: Valid Values (f√ºr CHECK Constraints)
+VV: Valid Values (f¸r CHECK Constraints)
 */
 
 
@@ -15,7 +15,7 @@ CREATE TABLE Laender
         NOT NULL
         CONSTRAINT AK_Landesname UNIQUE
     );
-COMMENT ON COLUMN Laender.ISOCode IS 'L√§nder.ISOCode m√ºssen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)';
+COMMENT ON COLUMN Laender.ISOCode IS 'L‰nder.ISOCode m¸ssen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)';
 
 
 /*Wegen Kreisreferenz zwischen Orte-Adressen-Flughaefen wird die Constraint
@@ -257,10 +257,10 @@ CREATE TABLE Rechnungen
     CONSTRAINT Rechnungen_Zahlungseingang_nach_Rechnungseingang CHECK(ZAHLUNGSEINGANG >= RECHNUNGSDATUM)
     );
 
-/*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage gr√∂√üer als 
-das Buchungsdatum. Implementierung erfolgt sp√§ter.*/
+/*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage grˆﬂer als 
+das Buchungsdatum. Implementierung erfolgt sp‰ter.*/
 
-CREATE VIEW Buchungen AS(
+CREATE VIEW Buchung AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum, b.Von, b.Bis, b.WohnungsID, b.KundenID
     FROM
@@ -269,7 +269,7 @@ CREATE VIEW Buchungen AS(
         b.Buchungsstatus = 'Buchung'
     );
 
-CREATE VIEW Reservierungen AS(
+CREATE VIEW Reservierung AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum AS Reservierungsdatum,
         b.Von, b.Bis, b.WohnungsID, b.KundenID
@@ -298,8 +298,8 @@ CREATE VIEW UebersichtKunden AS
             ON (k.KundenID = b.KundenID)
         LEFT OUTER JOIN Rechnungen r
             ON (b.BelegungsNr = r.BelegungsNr),
-        Bankverbindungen bv, ferienwohnungen f,
-        Rechnungen r, Adressen a, Orte o
+        Bankverbindungen bv, Ferienwohnungen f,
+        Adressen a, Orte o
     WHERE
         k.IBAN = bv.IBAN AND
         b.WohnungsID = f.WohnungsID AND

@@ -308,8 +308,7 @@ INSERT INTO Rechnungen(RechnungsNr, Rechnungsdatum, Rechnungsstatus, Rechnungsbe
 INSERT INTO Rechnungen(RechnungsNr, Rechnungsdatum, Rechnungsstatus, Rechnungsbetrag, Zahlungseingang, BelegungsNr)
     VALUES(2, '26.02.2016', 'offen', 549, null, 4);
 
-/*Relation kalkulierte_Distanz
-Hier unbedingt klÃ¤ren ob ueberhaupt notwendig bei den nicht kalkulierten Tupeln */
+/*Relation kalkulierte_Distanz*/
 INSERT INTO kalkulierte_Distanz (Startpunkt, Endpunkt, kalkulierte_Distanz)
 	VALUES(1, 4, 180);
 INSERT INTO kalkulierte_Distanz (Startpunkt, Endpunkt, kalkulierte_Distanz)
