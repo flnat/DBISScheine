@@ -20,7 +20,30 @@ WHERE
                 fh_fremd.Flughafenname = InlandsOrte.Flughafen AND
                 InlandsOrte.Land = o.Land
                 ))
-            
+
 ORDER BY fg.Rating DESC NULLS LAST
 FETCH FIRST 1 ROW WITH TIES
 ;
+
+with geeigneteFluegge(WohnungsID, Fremdflughafen, Heimatflughafen, Airline, Rating) AS (
+    SELECT f.WohnungsID, wa.Startflughafen, wa.Endflughafen, fg.Gesellschaftsname, fg.Rating
+    FROM
+        Ferienwohnungen f, Adressen a, Orte o, Flughaefen fh, Fluggesellschaften fg,
+        wird_angeflogen wa, Orte o_Ausland, Adressen a_Ausland, Flughaefen fh_Ausland
+    WHERE
+        f.WohnungsID = &gegebeneWohnung AND
+        f.AdressID = a.AdressID AND
+        a.OrtsID = o.OrtsID AND
+        o.Flughafen = fh.Flughafenname AND
+        wa.Endflughafen = fh.Flughafenname AND
+        fg.Gesellschaftsname = wa.Fluggesellschaft AND
+        o.OrtsID <> o_Ausland.OrtsID AND
+        o_Ausland.OrtsID = a_Ausland.OrtsID AND
+        a_Ausland.AdressID = fh_Ausland.AdressID AND
+        wa.Startflughafen = fh_Ausland.Flughafenname
+    )
+    
+SELECT *
+FROM geeigneteFluegge
+WHERE
+    Rating >= ALL(SELECT Rating FROM geeigneteFluegge);
