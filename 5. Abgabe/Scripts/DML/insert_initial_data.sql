@@ -195,27 +195,27 @@ INSERT INTO KUNDEN (KundenID, Email, Telefonnummer, Geburtsdatum, Vorname, Nachn
     VALUES(6, 'jim.knopf@gmx.net', '0171-9876543', '06.01.1995', 'Jim', 'Knopf', 27, 'DE85692717230007322890');
 
 /*Relation Ferienwohnungen*/
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(1,200, 6, 349, 'Finka', 11);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(2, 45, 2, 120, 'Ferienwohnung mit Seeblick', 12);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(3, 150, 3, 249, 'im Schnee', 13);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(4, 100, 4, 249, 'direkt am Meer', 14);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(5, 110, 3, 289, 'direkt am Park', 15);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(6, 70, 2, 549, 'mit Blick auf Eifelturm', 16);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(7, 110, 6, 159, 'Dachterrassewohnung zentral', 17);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(8, 200, 12, 240, 'zweigeschoessiges Haus', 18);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(9, 111, 5, 159, 'Topvilla am Strand', 19);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(10, 100, 4, 299, 'Ferienhaus am Strand', 20);
-INSERT INTO Ferienwohnungen (WohnungsID, Größe, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
+INSERT INTO Ferienwohnungen (WohnungsID, Groesse, Zimmerzahl, Tagespreis, Beschreibungstext, AdressID)
     VALUES(11, 100, 4, 150, 'Strandbungalow', 21);
 
 /*Relation Bilder*/
