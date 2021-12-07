@@ -1,4 +1,5 @@
 ALTER SESSION SET NLS_DATE_FORMAT = 'DD.MM.YYYY';
+
 /*
 Legende für Abkürzungen
 PK: Primary-Key
@@ -16,10 +17,7 @@ CREATE TABLE Laender
         CONSTRAINT AK_Landesname UNIQUE
     );
 COMMENT ON COLUMN Laender.ISOCode IS 'Länder.ISOCode müssen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)';
-
-
-/*Wegen Kreisreferenz zwischen Orte-Adressen-Flughaefen wird die Constraint
-FK_Orte_Flughafen erst spÃ¤ter erstellt*/    
+    
 CREATE TABLE Orte
     (OrtsID INTEGER
         CONSTRAINT PK_Orte PRIMARY KEY,
@@ -78,15 +76,12 @@ CREATE TABLE Flughaefen
         CONSTRAINT AK_Flughaefen_AdressID UNIQUE
     );
 
-
-/* Scharfstellen der FK_Orte_Flughaefen Constraint, da Kreisreferenz nun behoben */   
 ALTER TABLE Orte
-    ADD CONSTRAINT FK_Orte_Flughafen FOREIGN KEY (Flughafen) REFERENCES Flughaefen(Flughafenname);
-COMMENT ON TABLE Orte IS 'Die FK-Constraint FK_Orte_Flughafen wird aufgrund einer 
-circulÃ¤ren Dependenz zwischen den Relationen Orte, Adressen, Flughaefen erst nach der vollstÃ¤ndigen
-Spezifikation dieser drei Relationen auch selbst spezifiziert.';
+    ADD CONSTRAINT FK_Orte_Flughafen FOREIGN KEY (Flughafen) REFERENCES Flughaefen(Flughafenname)
+        INITIALLY DEFERRED DEFERRABLE
+        ;
 
-
+    
 CREATE TABLE Touristenattraktionen
     (Name_der_Attraktion VARCHAR2(64)
         CONSTRAINT PK_Touristenattraktionen PRIMARY KEY,
@@ -97,7 +92,6 @@ CREATE TABLE Touristenattraktionen
         CONSTRAINT FK_Touristenattraktionen_Adressen REFERENCES ADRESSEN(ADRESSID)
         CONSTRAINT AK_Touristenattraktionen_AdressID UNIQUE
     );
-
 
 CREATE TABLE Fluggesellschaften
     (Gesellschaftsname VARCHAR2(64)
@@ -134,7 +128,6 @@ CREATE TABLE Ferienwohnungen
      AdressID INTEGER
         NOT NULL
         CONSTRAINT FK_Ferienwohnungen_Adressen REFERENCES Adressen(AdressID)
-            ON DELETE CASCADE
         CONSTRAINT AK_Ferienwohnungen_AdressID UNIQUE,
         CONSTRAINT VV_Ferienwohnungen_Tagespreis CHECK (Tagespreis > 0),
         CONSTRAINT VV_Ferienwohnungen_Groesse CHECK (Groesse > 0)
@@ -202,12 +195,10 @@ CREATE TABLE Kunden
     AdressID INTEGER
         NOT NULL
         CONSTRAINT FK_Kunden_Adressen REFERENCES Adressen(AdressID)
-            ON DELETE CASCADE
         CONSTRAINT AK_Kunden_AdressID UNIQUE,
     IBAN CHAR(22)
         NOT NULL
         CONSTRAINT FK_Kunden_Bankverbindungen REFERENCES Bankverbindungen(IBAN)
-            ON DELETE CASCADE
         CONSTRAINT AK_Kunden_IBAN UNIQUE
     );
 
@@ -263,7 +254,7 @@ CREATE TABLE Rechnungen
 /*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage größer als 
 das Buchungsdatum. Implementierung erfolgt später.*/
 
-CREATE VIEW Buchung AS(
+CREATE VIEW Buchung (BuchungsNr, Buchungsdatum, Von, Bis, WohnungsID, KundenID) AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum, b.Von, b.Bis, b.WohnungsID, b.KundenID
     FROM
@@ -272,7 +263,7 @@ CREATE VIEW Buchung AS(
         b.Buchungsstatus = 'Buchung'
     );
 
-CREATE VIEW Reservierung AS(
+CREATE VIEW Reservierung (ReservierungsNr, Reservierungsdatum, Von, Bis, WohnungsID, KundenID) AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum AS Reservierungsdatum,
         b.Von, b.Bis, b.WohnungsID, b.KundenID
@@ -287,7 +278,9 @@ CREATE VIEW Familienwohnungen AS
     WHERE f.Groesse > 100
     WITH CHECK OPTION;
     
-CREATE VIEW UebersichtKunden AS
+CREATE VIEW UebersichtKunden (KundenID, Nachname, Vorname, Email, IBAN, BIC, Ortsname, Strasse,
+    Hausnummer, PLZ, BelegungnsNr, Buchungsstatus, Buchungsdatum, Von, Bis ,Rechnungsstatus,
+    WohnungsID, Beschreibungstext) AS
     SELECT
         k.KundenID, k.Nachname, k.Vorname, k.Email,
         bv.IBAN, bv.BIC,
@@ -309,7 +302,8 @@ CREATE VIEW UebersichtKunden AS
         k.AdressID = a.AdressID AND
         a.OrtsID = o.OrtsID
         ;
-CREATE VIEW Zahlungsstatus AS
+CREATE VIEW Zahlungsstatus (BelegungsNr, WohnungsID, Beschreibungstext, KundenID,
+Nachname, Vorname, RechnungsNr, Rechnungsdatum, Rechnungsbetrag, Zahlungsstatus, Zahlungseingang) AS
     SELECT b.BelegungsNr, f.WohnungsID, f.Beschreibungstext,
     k.KundenID, k.Nachname, k.Vorname,
     r.RechnungsNr, r.Rechnungsdatum, r.Rechnungsbetrag,
@@ -323,13 +317,16 @@ CREATE VIEW Zahlungsstatus AS
             ON f.WohnungsID = b.WohnungsID
         LEFT JOIN Rechnungen r
             ON r.BelegungsNr = b.BelegungsNr
+    WHERE
+        b.Buchungsstatus = 'Buchung'
     ORDER BY b.BelegungsNr, r.RechnungsNR ASC NULLS LAST        
     ;
-CREATE VIEW MidAgeKunden AS
+CREATE VIEW MidAgeKunden  (KundenID, Email, Telefonnummer, Geburtsdatum,
+"Alter", Vorname, Nachname, AdressID, IBAN) AS
     SELECT k.KundenID, K.Email, k.Telefonnummer, k.Geburtsdatum,
-    floor(months_between(sysdate, k.Geburtsdatum)/12) AS "Alter",
+    floor(months_between(CURRENT_DATE, k.Geburtsdatum)/12) AS "Alter",
     k.Vorname, k.Nachname, k.AdressID, k.IBAN
     FROM Kunden k
     WHERE
-        floor(months_between(sysdate, k.Geburtsdatum)/12) BETWEEN 30 AND 40
+        floor(months_between(CURRENT_DATE, k.Geburtsdatum)/12) BETWEEN 30 AND 40
     ;
