@@ -260,7 +260,7 @@ CREATE TABLE Rechnungen
 /*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage größer als 
 das Buchungsdatum. Implementierung erfolgt später.*/
 
-CREATE VIEW Buchung AS(
+CREATE VIEW Buchung (BuchungsNr, Buchungsdatum, Von, Bis, WohnungsID, KundenID) AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum, b.Von, b.Bis, b.WohnungsID, b.KundenID
     FROM
@@ -269,7 +269,7 @@ CREATE VIEW Buchung AS(
         b.Buchungsstatus = 'Buchung'
     );
 
-CREATE VIEW Reservierung AS(
+CREATE VIEW Reservierung (ReservierungsNr, Reservierungsdatum, Von, Bis, WohnungsID, KundenID) AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum AS Reservierungsdatum,
         b.Von, b.Bis, b.WohnungsID, b.KundenID
@@ -284,7 +284,9 @@ CREATE VIEW Familienwohnungen AS
     WHERE f.Groesse > 100
     WITH CHECK OPTION;
     
-CREATE VIEW UebersichtKunden AS
+CREATE VIEW UebersichtKunden (KundenID, Nachname, Vorname, Email, IBAN, BIC, Ortsname, Strasse,
+    Hausnummer, PLZ, BelegungnsNr, Buchungsstatus, Buchungsdatum, Von, Bis ,Rechnungsstatus,
+    WohnungsID, Beschreibungstext) AS
     SELECT
         k.KundenID, k.Nachname, k.Vorname, k.Email,
         bv.IBAN, bv.BIC,
@@ -306,7 +308,8 @@ CREATE VIEW UebersichtKunden AS
         k.AdressID = a.AdressID AND
         a.OrtsID = o.OrtsID
         ;
-CREATE VIEW Zahlungsstatus AS
+CREATE VIEW Zahlungsstatus (BelegungsNr, WohnungsID, Beschreibungstext, KundenID,
+Nachname, Vorname, RechnungsNr, Rechnungsdatum, Rechnungsbetrag, Zahlungsstatus, Zahlungseingang) AS
     SELECT b.BelegungsNr, f.WohnungsID, f.Beschreibungstext,
     k.KundenID, k.Nachname, k.Vorname,
     r.RechnungsNr, r.Rechnungsdatum, r.Rechnungsbetrag,
@@ -324,11 +327,12 @@ CREATE VIEW Zahlungsstatus AS
         b.Buchungsstatus = 'Buchung'
     ORDER BY b.BelegungsNr, r.RechnungsNR ASC NULLS LAST        
     ;
-CREATE VIEW MidAgeKunden AS
+CREATE VIEW MidAgeKunden  (KundenID, Email, Telefonnummer, Geburtsdatum,
+"Alter", Vorname, Nachname, AdressID, IBAN) AS
     SELECT k.KundenID, K.Email, k.Telefonnummer, k.Geburtsdatum,
-    floor(months_between(sysdate, k.Geburtsdatum)/12) AS "Alter",
+    floor(months_between(CURRENT_DATE, k.Geburtsdatum)/12) AS "Alter",
     k.Vorname, k.Nachname, k.AdressID, k.IBAN
     FROM Kunden k
     WHERE
-        floor(months_between(sysdate, k.Geburtsdatum)/12) BETWEEN 30 AND 40
+        floor(months_between(CURRENT_DATE, k.Geburtsdatum)/12) BETWEEN 30 AND 40
     ;
