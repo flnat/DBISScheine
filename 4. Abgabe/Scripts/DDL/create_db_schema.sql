@@ -313,13 +313,11 @@ CREATE VIEW Zahlungsstatus AS
     CASE WHEN r.ZAHLUNGSEINGANG IS NOT NULL THEN 'bezahlt' ELSE 'offen' END AS Zahlungsstatus,
     r.ZAHLUNGSEINGANG
     FROM
-        Belegungen b
-        LEFT JOIN Kunden k
-            ON k.KundenID = b.KundenID
-        LEFT JOIN Ferienwohnungen f
-            ON f.WohnungsID = b.WohnungsID
-        LEFT JOIN Rechnungen r
-            ON r.BelegungsNr = b.BelegungsNr
+        Belegungen b, Kunden k, Ferienwohnungen f, Rechungen r
+    WHERE
+        b.KundenID = k.KundenID AND
+        f.WohnungsID = b.WohnungsID AND 
+        r.BelegungsNr = b.BelegungsNr
     ORDER BY b.BelegungsNr, r.RechnungsNR ASC NULLS LAST        
     ;
 CREATE VIEW MidAgeKunden AS
