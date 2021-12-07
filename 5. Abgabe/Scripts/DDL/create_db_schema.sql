@@ -310,14 +310,11 @@ Nachname, Vorname, RechnungsNr, Rechnungsdatum, Rechnungsbetrag, Zahlungsstatus,
     CASE WHEN r.ZAHLUNGSEINGANG IS NOT NULL THEN 'bezahlt' ELSE 'offen' END AS Zahlungsstatus,
     r.ZAHLUNGSEINGANG
     FROM
-        Belegungen b
-        LEFT JOIN Kunden k
-            ON k.KundenID = b.KundenID
-        LEFT JOIN Ferienwohnungen f
-            ON f.WohnungsID = b.WohnungsID
-        LEFT JOIN Rechnungen r
+        Belegungen b LEFT OUTER JOIN Rechnungen r
             ON r.BelegungsNr = b.BelegungsNr
     WHERE
+        b.WohnungsID = f.WohnungsID AND
+        b.KundenID = f.KundenID AND
         b.Buchungsstatus = 'Buchung'
     ORDER BY b.BelegungsNr, r.RechnungsNR ASC NULLS LAST        
     ;
