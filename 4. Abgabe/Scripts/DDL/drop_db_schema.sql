@@ -1,5 +1,5 @@
-DROP VIEW Buchungen;
-DROP VIEW Reservierungen;
+DROP VIEW Buchung;
+DROP VIEW Reservierung;
 DROP VIEW Familienwohnungen;
 DROP VIEW UebersichtKunden;
 DROP VIEW Zahlungsstatus;
