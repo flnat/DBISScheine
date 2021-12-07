@@ -311,10 +311,11 @@ Nachname, Vorname, RechnungsNr, Rechnungsdatum, Rechnungsbetrag, Zahlungsstatus,
     r.ZAHLUNGSEINGANG
     FROM
         Belegungen b LEFT OUTER JOIN Rechnungen r
-            ON r.BelegungsNr = b.BelegungsNr
+            ON r.BelegungsNr = b.BelegungsNr,
+        Kunden k, Ferienwohnungen f
     WHERE
         b.WohnungsID = f.WohnungsID AND
-        b.KundenID = f.KundenID AND
+        b.KundenID = k.KundenID AND
         b.Buchungsstatus = 'Buchung'
     ORDER BY b.BelegungsNr, r.RechnungsNR ASC NULLS LAST        
     ;
