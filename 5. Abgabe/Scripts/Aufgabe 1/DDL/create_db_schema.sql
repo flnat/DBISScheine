@@ -62,6 +62,7 @@ CREATE TABLE Adressen
     OrtsID  INTEGER
         NOT NULL
         CONSTRAINT FK_Adressen_Orte REFERENCES Orte(ORTSID)
+            DEFERRABLE INITIALLY DEFERRED
     );
 COMMENT ON COLUMN Adressen.AdressID IS 'Eine AdressID darf maximal
 entweder einer Wohnung, einem Kunden, einer Touristenattraktion oder einem Flughafen zugeordnet werden';
@@ -73,8 +74,9 @@ CREATE TABLE Flughaefen
     AdressID INTEGER
         NOT NULL
         CONSTRAINT FK_Flughafen_Adressen REFERENCES Adressen(AdressID)
+            DEFERRABLE INITIALLY DEFERRED
         CONSTRAINT AK_Flughaefen_AdressID UNIQUE
-    );
+    );  
 
 ALTER TABLE Orte
     ADD CONSTRAINT FK_Orte_Flughafen FOREIGN KEY (Flughafen) REFERENCES Flughaefen(Flughafenname)
@@ -90,6 +92,7 @@ CREATE TABLE Touristenattraktionen
     AdressID INTEGER
         NOT NULL
         CONSTRAINT FK_Touristenattraktionen_Adressen REFERENCES ADRESSEN(ADRESSID)
+            ON DELETE CASCADE
         CONSTRAINT AK_Touristenattraktionen_AdressID UNIQUE
     );
 
@@ -108,7 +111,8 @@ CREATE TABLE wird_angeflogen
     Endflughafen VARCHAR2(64)
         CONSTRAINT FK_Endflughafen REFERENCES Flughaefen(Flughafenname),
     Fluggesellschaft VARCHAR2(64)
-        CONSTRAINT FK_Fluggesellschaft REFERENCES Fluggesellschaften(Gesellschaftsname),
+        CONSTRAINT FK_Fluggesellschaft REFERENCES Fluggesellschaften(Gesellschaftsname)
+            ON DELETE CASCADE,
     CONSTRAINT PK_wirdangeflogen PRIMARY KEY (Startflughafen, Endflughafen, Fluggesellschaft),
     CONSTRAINT wird_angeflogen_StartF_ungleich_Endf CHECK (Startflughafen <> Endflughafen)
     );
@@ -144,9 +148,11 @@ CREATE TABLE Zusatzaustattungen
 
 CREATE TABLE bietet
     (WohnungsID INTEGER
-        CONSTRAINT FK_bietet_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID),
+        CONSTRAINT FK_bietet_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID)
+            ON DELETE CASCADE,
     Ausstattungsbeschreibung VARCHAR2(256)
-        CONSTRAINT FK_bietet_Zusatzaustattungen REFERENCES Zusatzaustattungen(Beschreibung),
+        CONSTRAINT FK_bietet_Zusatzaustattungen REFERENCES Zusatzaustattungen(Beschreibung)
+            ON DELETE CASCADE,
     CONSTRAINT PK_bietet PRIMARY KEY (WohnungsID, Ausstattungsbeschreibung)
     );
 
@@ -161,6 +167,7 @@ CREATE TABLE Bilder
     WohnungsID INTEGER
         NOT NULL
         CONSTRAINT FK_Bilder_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID)
+            ON DELETE CASCADE
     );
 COMMENT ON TABLE Bilder IS 'Einer Ferienwohnung können maximal 4 Bilder zugeordnet werden';
 
@@ -199,6 +206,7 @@ CREATE TABLE Kunden
     IBAN CHAR(22)
         NOT NULL
         CONSTRAINT FK_Kunden_Bankverbindungen REFERENCES Bankverbindungen(IBAN)
+            ON DELETE CASCADE
         CONSTRAINT AK_Kunden_IBAN UNIQUE
     );
 
@@ -217,7 +225,8 @@ CREATE TABLE Belegungen
         CONSTRAINT VV_Belegungen_Belegungsstatus CHECK (BUCHUNGSSTATUS IN ('Buchung', 'Reservierung')),
     WohnungsID INTEGER
         NOT NULL
-        CONSTRAINT FK_Belegungen_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID),
+        CONSTRAINT FK_Belegungen_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID)
+            ON DELETE CASCADE,
     KundenID INTEGER
         NOT NULL
         CONSTRAINT FK_Belegungen_Kunden REFERENCES Kunden(KundenID),
@@ -230,7 +239,6 @@ CREATE TABLE Belegungen
 
 
 /*Eine Belegung führt nach einer Woche zu einer Rechnung */
-
 
 CREATE TABLE Rechnungen
     (RechnungsNr INTEGER
@@ -247,6 +255,7 @@ CREATE TABLE Rechnungen
     BelegungsNr INTEGER
         NOT NULL
         CONSTRAINT FK_Rechnungen_Belegungen REFERENCES Belegungen(BelegungsNr)
+            ON DELETE CASCADE
         CONSTRAINT AK_Rechnungen_BelegungsNr UNIQUE,
     CONSTRAINT Rechnungen_Zahlungseingang_nach_Rechnungseingang CHECK(ZAHLUNGSEINGANG >= RECHNUNGSDATUM)
     );
