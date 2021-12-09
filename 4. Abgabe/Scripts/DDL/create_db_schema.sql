@@ -44,12 +44,12 @@ CREATE TABLE kalkulierte_Distanz
     CONSTRAINT PK_kalkulierte_Distanz PRIMARY KEY (Startpunkt, Endpunkt),
     CONSTRAINT kalkulierte_Distanz_SP_ungleich_EP CHECK (Startpunkt <> Endpunkt)
     );
-COMMENT ON TABLE kalkulierte_Distanz IS'Die Distanz eines Punktes zu sich selbst sei als 0 anzunehmen. Implementierung erfolgt als ???
+COMMENT ON TABLE kalkulierte_Distanz IS'Die Distanz eines Punktes zu sich selbst sei als 0 anzunehmen.
 Falls die Distanz zwischen zwei Punkten nicht bekannt ist, so ist diese als unbekannt null anzunehmen
 Die Distanz zwischen zwei beliebigen Punkten wird genau einmal gespeichert.';
 COMMENT ON COLUMN kalkulierte_Distanz.kalkulierte_Distanz IS ' Die kalkulierte Distanz
-ist als Distanz in km zu lesen. Da LÃ¤nge als messbarer Wert typischerweise 
-von stetiger Natur ist wurde an dieser Stelle ein passender Gleitkommadatentyp gewÃ¤hlt.';
+ist als Distanz in km zu lesen. Da Laenge als messbarer Wert typischerweise 
+von stetiger Natur ist wurde an dieser Stelle ein passender Gleitkommadatentyp gewaehlt.';
 
 
 CREATE TABLE Adressen
@@ -257,10 +257,10 @@ CREATE TABLE Rechnungen
     CONSTRAINT Rechnungen_Zahlungseingang_nach_Rechnungseingang CHECK(ZAHLUNGSEINGANG >= RECHNUNGSDATUM)
     );
 
-/*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage größer als 
+/*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage groesser als 
 das Buchungsdatum. Implementierung erfolgt später.*/
 
-CREATE VIEW Buchung (BuchungsNr, Buchungsdatum, Von, Bis, WohnungsID, KundenID) AS(
+CREATE OR REPLACE VIEW Buchung (BuchungsNr, Buchungsdatum, Von, Bis, WohnungsID, KundenID) AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum, b.Von, b.Bis, b.WohnungsID, b.KundenID
     FROM
@@ -269,7 +269,7 @@ CREATE VIEW Buchung (BuchungsNr, Buchungsdatum, Von, Bis, WohnungsID, KundenID) 
         b.Buchungsstatus = 'Buchung'
     );
 
-CREATE VIEW Reservierung (ReservierungsNr, Reservierungsdatum, Von, Bis, WohnungsID, KundenID) AS(
+CREATE OR REPLACE VIEW Reservierung (ReservierungsNr, Reservierungsdatum, Von, Bis, WohnungsID, KundenID) AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum AS Reservierungsdatum,
         b.Von, b.Bis, b.WohnungsID, b.KundenID
@@ -284,7 +284,7 @@ CREATE VIEW Familienwohnungen AS
     WHERE f.Groesse > 100
     WITH CHECK OPTION;
     
-CREATE VIEW UebersichtKunden (KundenID, Nachname, Vorname, Email, IBAN, BIC, Ortsname, Strasse,
+CREATE OR REPLACE VIEW UebersichtKunden (KundenID, Nachname, Vorname, Email, IBAN, BIC, Ortsname, Strasse,
     Hausnummer, PLZ, BelegungnsNr, Buchungsstatus, Buchungsdatum, Von, Bis ,Rechnungsstatus,
     WohnungsID, Beschreibungstext) AS
     SELECT
@@ -298,17 +298,19 @@ CREATE VIEW UebersichtKunden (KundenID, Nachname, Vorname, Email, IBAN, BIC, Ort
     FROM
         Kunden k LEFT OUTER JOIN Belegungen b
             ON (k.KundenID = b.KundenID)
+        LEFT OUTER JOIN Ferienwohnungen f
+            ON (f.WohnungsID = b.WohnungsID)
         LEFT OUTER JOIN Rechnungen r
             ON (b.BelegungsNr = r.BelegungsNr),
-        Bankverbindungen bv, Ferienwohnungen f,
+            
+        Bankverbindungen bv,
         Adressen a, Orte o
     WHERE
         k.IBAN = bv.IBAN AND
-        b.WohnungsID = f.WohnungsID AND
         k.AdressID = a.AdressID AND
         a.OrtsID = o.OrtsID
         ;
-CREATE VIEW Zahlungsstatus (BelegungsNr, WohnungsID, Beschreibungstext, KundenID,
+CREATE OR REPLACE VIEW Zahlungsstatus (BelegungsNr, WohnungsID, Beschreibungstext, KundenID,
 Nachname, Vorname, RechnungsNr, Rechnungsdatum, Rechnungsbetrag, Zahlungsstatus, Zahlungseingang) AS
     SELECT b.BelegungsNr, f.WohnungsID, f.Beschreibungstext,
     k.KundenID, k.Nachname, k.Vorname,
@@ -325,7 +327,7 @@ Nachname, Vorname, RechnungsNr, Rechnungsdatum, Rechnungsbetrag, Zahlungsstatus,
         b.Buchungsstatus = 'Buchung'
     ORDER BY b.BelegungsNr, r.RechnungsNR ASC NULLS LAST        
     ;
-CREATE VIEW MidAgeKunden  (KundenID, Email, Telefonnummer, Geburtsdatum,
+CREATE OR REPLACE VIEW  MidAgeKunden  (KundenID, Email, Telefonnummer, Geburtsdatum,
 "Alter", Vorname, Nachname, AdressID, IBAN) AS
     SELECT k.KundenID, K.Email, k.Telefonnummer, k.Geburtsdatum,
     floor(months_between(CURRENT_DATE, k.Geburtsdatum)/12) AS "Alter",

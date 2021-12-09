@@ -14,11 +14,10 @@ DROP TABLE Bietet;
 DROP TABLE Zusatzaustattungen;
 DROP TABLE Ferienwohnungen;
 DROP TABLE Touristenattraktionen;
-
-/*Entferne die FK Constraint FK_Orte_Flughafen um die circuläre Referenz zu deaktivieren und somit die DDL Statements erfolgreich durchzuführen  */
-ALTER TABLE Orte DROP CONSTRAINT FK_Orte_Flughafen;
 DROP TABLE wird_angeflogen;
 DROP TABLE Fluggesellschaften;
+ALTER TABLE Orte
+    DROP CONSTRAINT FK_Orte_Flughafen;
 DROP TABLE Flughaefen;
 DROP TABLE Adressen;
 DROP TABLE kalkulierte_Distanz;

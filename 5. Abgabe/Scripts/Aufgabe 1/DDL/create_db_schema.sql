@@ -1,11 +1,10 @@
 ALTER SESSION SET NLS_DATE_FORMAT = 'DD.MM.YYYY';
-
 /*
-Legende f¸r Abk¸rzungen
+Legende f√ºr Abk√ºrzungen
 PK: Primary-Key
 FK: Foreign-Key
 AK: Alternate-Key
-VV: Valid Values (f¸r CHECK Constraints)
+VV: Valid Values (f√ºr CHECK Constraints)
 */
 
 
@@ -16,8 +15,11 @@ CREATE TABLE Laender
         NOT NULL
         CONSTRAINT AK_Landesname UNIQUE
     );
-COMMENT ON COLUMN Laender.ISOCode IS 'L‰nder.ISOCode m¸ssen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)';
-    
+COMMENT ON COLUMN Laender.ISOCode IS 'Laender.ISOCode muessen dem ISO 3166-1 alpha-2 Standard folgen (z.B. DE, FR, GB, ES)';
+
+
+/*Wegen Kreisreferenz zwischen Orte-Adressen-Flughaefen wird die Constraint
+FK_Orte_Flughafen erst sp√§ter erstellt*/    
 CREATE TABLE Orte
     (OrtsID INTEGER
         CONSTRAINT PK_Orte PRIMARY KEY,
@@ -28,26 +30,30 @@ CREATE TABLE Orte
     Land CHAR(2)
         NOT NULL
         CONSTRAINT FK_Orte_Laender REFERENCES Laender(ISOCode)
+            ON DELETE CASCADE 
+            DEFERRABLE INITIALLY DEFERRED
     );
 
    
 CREATE TABLE kalkulierte_Distanz
     (Startpunkt INTEGER
-        CONSTRAINT FK_Startpunkt REFERENCES Orte(OrtsID),
+        CONSTRAINT FK_Startpunkt REFERENCES Orte(OrtsID)
+            ON DELETE CASCADE,
     Endpunkt INTEGER
-        CONSTRAINT FK_Endpunkt REFERENCES Orte(OrtsID),
+        CONSTRAINT FK_Endpunkt REFERENCES Orte(OrtsID)
+            ON DELETE CASCADE,
     kalkulierte_Distanz FLOAT
         NOT NULL
         CONSTRAINT VV_kalkulierte_Distanz_positiv CHECK (kalkulierte_Distanz > 0),
     CONSTRAINT PK_kalkulierte_Distanz PRIMARY KEY (Startpunkt, Endpunkt),
     CONSTRAINT kalkulierte_Distanz_SP_ungleich_EP CHECK (Startpunkt <> Endpunkt)
     );
-COMMENT ON TABLE kalkulierte_Distanz IS'Die Distanz eines Punktes zu sich selbst sei als 0 anzunehmen. Implementierung erfolgt als ???
+COMMENT ON TABLE kalkulierte_Distanz IS'Die Distanz eines Punktes zu sich selbst sei als 0 anzunehmen.
 Falls die Distanz zwischen zwei Punkten nicht bekannt ist, so ist diese als unbekannt null anzunehmen
 Die Distanz zwischen zwei beliebigen Punkten wird genau einmal gespeichert.';
 COMMENT ON COLUMN kalkulierte_Distanz.kalkulierte_Distanz IS ' Die kalkulierte Distanz
-ist als Distanz in km zu lesen. Da L√§nge als messbarer Wert typischerweise 
-von stetiger Natur ist wurde an dieser Stelle ein passender Gleitkommadatentyp gew√§hlt.';
+ist als Distanz in km zu lesen. Da Laenge als messbarer Wert typischerweise 
+von stetiger Natur ist wurde an dieser Stelle ein passender Gleitkommadatentyp gewaehlt.';
 
 
 CREATE TABLE Adressen
@@ -62,6 +68,7 @@ CREATE TABLE Adressen
     OrtsID  INTEGER
         NOT NULL
         CONSTRAINT FK_Adressen_Orte REFERENCES Orte(ORTSID)
+            ON DELETE CASCADE
             DEFERRABLE INITIALLY DEFERRED
     );
 COMMENT ON COLUMN Adressen.AdressID IS 'Eine AdressID darf maximal
@@ -76,14 +83,18 @@ CREATE TABLE Flughaefen
         CONSTRAINT FK_Flughafen_Adressen REFERENCES Adressen(AdressID)
             DEFERRABLE INITIALLY DEFERRED
         CONSTRAINT AK_Flughaefen_AdressID UNIQUE
-    );  
+    );
 
+
+/* Scharfstellen der FK_Orte_Flughaefen Constraint, da Kreisreferenz nun behoben */   
 ALTER TABLE Orte
     ADD CONSTRAINT FK_Orte_Flughafen FOREIGN KEY (Flughafen) REFERENCES Flughaefen(Flughafenname)
-        INITIALLY DEFERRED DEFERRABLE
-        ;
+        DEFERRABLE INITIALLY DEFERRED;
+COMMENT ON TABLE Orte IS 'Die FK-Constraint FK_Orte_Flughafen wird aufgrund einer 
+circul‰ren Dependenz zwischen den Relationen Orte, Adressen, Flughaefen erst nach der vollst√§ndigen
+Spezifikation dieser drei Relationen auch selbst spezifiziert.';
 
-    
+
 CREATE TABLE Touristenattraktionen
     (Name_der_Attraktion VARCHAR2(64)
         CONSTRAINT PK_Touristenattraktionen PRIMARY KEY,
@@ -92,9 +103,9 @@ CREATE TABLE Touristenattraktionen
     AdressID INTEGER
         NOT NULL
         CONSTRAINT FK_Touristenattraktionen_Adressen REFERENCES ADRESSEN(ADRESSID)
-            ON DELETE CASCADE
         CONSTRAINT AK_Touristenattraktionen_AdressID UNIQUE
     );
+
 
 CREATE TABLE Fluggesellschaften
     (Gesellschaftsname VARCHAR2(64)
@@ -107,9 +118,13 @@ CREATE TABLE Fluggesellschaften
 
 CREATE TABLE wird_angeflogen
     (Startflughafen VARCHAR2(64)
-        CONSTRAINT FK_Startflughafen REFERENCES Flughaefen(Flughafenname),
+        CONSTRAINT FK_Startflughafen REFERENCES Flughaefen(Flughafenname)
+            ON DELETE CASCADE
+            DEFERRABLE INITIALLY DEFERRED,
     Endflughafen VARCHAR2(64)
-        CONSTRAINT FK_Endflughafen REFERENCES Flughaefen(Flughafenname),
+        CONSTRAINT FK_Endflughafen REFERENCES Flughaefen(Flughafenname)
+            ON DELETE CASCADE
+            DEFERRABLE INITIALLY DEFERRED,
     Fluggesellschaft VARCHAR2(64)
         CONSTRAINT FK_Fluggesellschaft REFERENCES Fluggesellschaften(Gesellschaftsname)
             ON DELETE CASCADE,
@@ -132,6 +147,7 @@ CREATE TABLE Ferienwohnungen
      AdressID INTEGER
         NOT NULL
         CONSTRAINT FK_Ferienwohnungen_Adressen REFERENCES Adressen(AdressID)
+            DEFERRABLE INITIALLY DEFERRED 
         CONSTRAINT AK_Ferienwohnungen_AdressID UNIQUE,
         CONSTRAINT VV_Ferienwohnungen_Tagespreis CHECK (Tagespreis > 0),
         CONSTRAINT VV_Ferienwohnungen_Groesse CHECK (Groesse > 0)
@@ -149,10 +165,12 @@ CREATE TABLE Zusatzaustattungen
 CREATE TABLE bietet
     (WohnungsID INTEGER
         CONSTRAINT FK_bietet_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID)
-            ON DELETE CASCADE,
+            ON DELETE CASCADE
+            DEFERRABLE INITIALLY DEFERRED,
     Ausstattungsbeschreibung VARCHAR2(256)
         CONSTRAINT FK_bietet_Zusatzaustattungen REFERENCES Zusatzaustattungen(Beschreibung)
-            ON DELETE CASCADE,
+            ON DELETE CASCADE
+            DEFERRABLE INITIALLY DEFERRED,
     CONSTRAINT PK_bietet PRIMARY KEY (WohnungsID, Ausstattungsbeschreibung)
     );
 
@@ -168,6 +186,7 @@ CREATE TABLE Bilder
         NOT NULL
         CONSTRAINT FK_Bilder_Ferienwohnungen REFERENCES Ferienwohnungen(WohnungsID)
             ON DELETE CASCADE
+            DEFERRABLE INITIALLY DEFERRED
     );
 COMMENT ON TABLE Bilder IS 'Einer Ferienwohnung k√∂nnen maximal 4 Bilder zugeordnet werden';
 
@@ -202,11 +221,12 @@ CREATE TABLE Kunden
     AdressID INTEGER
         NOT NULL
         CONSTRAINT FK_Kunden_Adressen REFERENCES Adressen(AdressID)
+            DEFERRABLE INITIALLY DEFERRED
         CONSTRAINT AK_Kunden_AdressID UNIQUE,
     IBAN CHAR(22)
         NOT NULL
         CONSTRAINT FK_Kunden_Bankverbindungen REFERENCES Bankverbindungen(IBAN)
-            ON DELETE CASCADE
+            DEFERRABLE INITIALLY DEFERRED
         CONSTRAINT AK_Kunden_IBAN UNIQUE
     );
 
@@ -229,7 +249,8 @@ CREATE TABLE Belegungen
             ON DELETE CASCADE,
     KundenID INTEGER
         NOT NULL
-        CONSTRAINT FK_Belegungen_Kunden REFERENCES Kunden(KundenID),
+        CONSTRAINT FK_Belegungen_Kunden REFERENCES Kunden(KundenID)
+            ON DELETE CASCADE,
     CONSTRAINT VV_Belegungen_Von_kleiner_Bis CHECK (Von <= Bis)
     );
 
@@ -239,6 +260,7 @@ CREATE TABLE Belegungen
 
 
 /*Eine Belegung f√ºhrt nach einer Woche zu einer Rechnung */
+
 
 CREATE TABLE Rechnungen
     (RechnungsNr INTEGER
@@ -260,10 +282,10 @@ CREATE TABLE Rechnungen
     CONSTRAINT Rechnungen_Zahlungseingang_nach_Rechnungseingang CHECK(ZAHLUNGSEINGANG >= RECHNUNGSDATUM)
     );
 
-/*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage grˆﬂer als 
-das Buchungsdatum. Implementierung erfolgt sp‰ter.*/
+/*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage groesser als 
+das Buchungsdatum. Implementierung erfolgt sp√§ter.*/
 
-CREATE VIEW Buchung (BuchungsNr, Buchungsdatum, Von, Bis, WohnungsID, KundenID) AS(
+CREATE OR REPLACE VIEW Buchung (BuchungsNr, Buchungsdatum, Von, Bis, WohnungsID, KundenID) AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum, b.Von, b.Bis, b.WohnungsID, b.KundenID
     FROM
@@ -272,7 +294,7 @@ CREATE VIEW Buchung (BuchungsNr, Buchungsdatum, Von, Bis, WohnungsID, KundenID) 
         b.Buchungsstatus = 'Buchung'
     );
 
-CREATE VIEW Reservierung (ReservierungsNr, Reservierungsdatum, Von, Bis, WohnungsID, KundenID) AS(
+CREATE OR REPLACE VIEW Reservierung (ReservierungsNr, Reservierungsdatum, Von, Bis, WohnungsID, KundenID) AS(
     SELECT
         b.BelegungsNr AS BuchungsNr, b.Buchungsdatum AS Reservierungsdatum,
         b.Von, b.Bis, b.WohnungsID, b.KundenID
@@ -287,7 +309,7 @@ CREATE VIEW Familienwohnungen AS
     WHERE f.Groesse > 100
     WITH CHECK OPTION;
     
-CREATE VIEW UebersichtKunden (KundenID, Nachname, Vorname, Email, IBAN, BIC, Ortsname, Strasse,
+CREATE OR REPLACE VIEW UebersichtKunden (KundenID, Nachname, Vorname, Email, IBAN, BIC, Ortsname, Strasse,
     Hausnummer, PLZ, BelegungnsNr, Buchungsstatus, Buchungsdatum, Von, Bis ,Rechnungsstatus,
     WohnungsID, Beschreibungstext) AS
     SELECT
@@ -301,17 +323,19 @@ CREATE VIEW UebersichtKunden (KundenID, Nachname, Vorname, Email, IBAN, BIC, Ort
     FROM
         Kunden k LEFT OUTER JOIN Belegungen b
             ON (k.KundenID = b.KundenID)
+        LEFT OUTER JOIN Ferienwohnungen f
+            ON (f.WohnungsID = b.WohnungsID)
         LEFT OUTER JOIN Rechnungen r
             ON (b.BelegungsNr = r.BelegungsNr),
-        Bankverbindungen bv, Ferienwohnungen f,
+            
+        Bankverbindungen bv,
         Adressen a, Orte o
     WHERE
         k.IBAN = bv.IBAN AND
-        b.WohnungsID = f.WohnungsID AND
         k.AdressID = a.AdressID AND
         a.OrtsID = o.OrtsID
         ;
-CREATE VIEW Zahlungsstatus (BelegungsNr, WohnungsID, Beschreibungstext, KundenID,
+CREATE OR REPLACE VIEW Zahlungsstatus (BelegungsNr, WohnungsID, Beschreibungstext, KundenID,
 Nachname, Vorname, RechnungsNr, Rechnungsdatum, Rechnungsbetrag, Zahlungsstatus, Zahlungseingang) AS
     SELECT b.BelegungsNr, f.WohnungsID, f.Beschreibungstext,
     k.KundenID, k.Nachname, k.Vorname,
@@ -328,7 +352,7 @@ Nachname, Vorname, RechnungsNr, Rechnungsdatum, Rechnungsbetrag, Zahlungsstatus,
         b.Buchungsstatus = 'Buchung'
     ORDER BY b.BelegungsNr, r.RechnungsNR ASC NULLS LAST        
     ;
-CREATE VIEW MidAgeKunden  (KundenID, Email, Telefonnummer, Geburtsdatum,
+CREATE OR REPLACE VIEW  MidAgeKunden  (KundenID, Email, Telefonnummer, Geburtsdatum,
 "Alter", Vorname, Nachname, AdressID, IBAN) AS
     SELECT k.KundenID, K.Email, k.Telefonnummer, k.Geburtsdatum,
     floor(months_between(CURRENT_DATE, k.Geburtsdatum)/12) AS "Alter",

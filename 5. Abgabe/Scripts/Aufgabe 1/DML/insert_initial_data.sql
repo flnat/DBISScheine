@@ -5,17 +5,17 @@ INSERT INTO Laender (isocode, landesname)
 INSERT INTO Laender (isocode, Landesname)
     VALUES('CH', 'Schweiz');
 INSERT INTO Laender (isocode, landesname)
-    VALUES('TR', 'Türkei');
+    VALUES('TR', 'Tuerkei');
 INSERT INTO Laender (isocode, landesname)
     VALUES('FR', 'Frankreich');
 INSERT INTO Laender (isocode, landesname)
     VALUES('ES', 'Spanien');
 INSERT INTO Laender (isocode, landesname)
-    VALUES('GL', 'Grönland');
+    VALUES('GL', 'Groenland');
 
 /*Relation Orte */
 /*Disable FK Constraint to circumvent circular FK References */
-ALTER TABLE Orte DISABLE CONSTRAINT FK_Orte_Flughafen;
+
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
     VALUES (1,'Konstanz', 'Frankfurt', 'DE');
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
@@ -27,17 +27,17 @@ INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
     VALUES (5, 'Frankfurt', 'Frankfurt', 'DE');
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
-    VALUES (6, 'Bern', 'Zürich', 'CH');
+    VALUES (6, 'Bern', 'Zuerich', 'CH');
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
-    VALUES (7, 'Zürich', 'Zürich', 'CH');
+    VALUES (7, 'Zuerich', 'Zuerich', 'CH');
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
-    VALUES (8, 'Chur', 'Zürich', 'CH');
+    VALUES (8, 'Chur', 'Zuerich', 'CH');
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
-    VALUES (9, 'Flims-Laax', 'Zürich', 'CH');
+    VALUES (9, 'Flims-Laax', 'Zuerich', 'CH');
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
     VALUES (10, 'Istanbul', 'Istanbul', 'TR');
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
-    VALUES (11, 'Öludeniz', 'Istanbul', 'TR');
+    VALUES (11, 'Oeludeniz', 'Istanbul', 'TR');
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
     VALUES (12, 'Antalya', 'Istanbul', 'TR');
 INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
@@ -54,7 +54,7 @@ INSERT INTO Orte (OrtsID, Ortsname, Flughafen, Land)
 INSERT INTO Adressen (AdressID, Strasse, Hausnummer, PLZ, OrtsID)
     VALUES(1, 'Am Flughafen', '2', '60541', 5);
 INSERT INTO Adressen (AdressID, Strasse, Hausnummer, PLZ, OrtsID)
-    VALUES(2, 'Sabiha Gökcen', '1', '1452', 10);
+    VALUES(2, 'Sabiha Goekcen', '1', '1452', 10);
 INSERT INTO Adressen (AdressID, Strasse, Hausnummer, PLZ, OrtsID)
     VALUES(3, 'Flughafen-Allee', '100', '5098', 7);
 INSERT INTO Adressen (AdressID, Strasse, Hausnummer, PLZ, OrtsID)
@@ -113,7 +113,7 @@ INSERT INTO Flughaefen (Flughafenname, AdressID)
 INSERT INTO Flughaefen (Flughafenname, AdressID)
     VALUES('Istanbul', 2);
 INSERT INTO Flughaefen (Flughafenname, AdressID)
-    VALUES('Zürich', 3);
+    VALUES('Zuerich', 3);
 INSERT INTO Flughaefen (Flughafenname, AdressID)
     VALUES('Paris', 4);
 INSERT INTO Flughaefen (Flughafenname, AdressID)
@@ -121,7 +121,7 @@ INSERT INTO Flughaefen (Flughafenname, AdressID)
     
 /*Nachdem die Relation Flughaefen nun erstellt ist, kann die Constraint FK_Orte_Flughaefen
 ohne Vereltzung wieder scharf gestellt werden.*/
-ALTER TABLE Orte ENABLE CONSTRAINT FK_Orte_Flughafen;
+
 
 /*Relation Touristenattraktion*/
 INSERT INTO Touristenattraktionen (Name_der_Attraktion, Beschreibung, AdressID)
@@ -163,7 +163,7 @@ INSERT INTO wird_angeflogen (Startflughafen, Endflughafen, Fluggesellschaft)
 INSERT INTO wird_angeflogen (Startflughafen, Endflughafen, Fluggesellschaft)
     VALUES('Paris', 'Barcelona', 'Hapag Lloyd');
 INSERT INTO wird_angeflogen (Startflughafen, Endflughafen, Fluggesellschaft)
-    VALUES('Paris', 'Zürich', 'German Wings');
+    VALUES('Paris', 'Zuerich', 'German Wings');
 
 /*Relation Bankverbindungen*/
 INSERT INTO Bankverbindungen (IBAN, BIC, Kontonummer, BLZ)
@@ -308,8 +308,7 @@ INSERT INTO Rechnungen(RechnungsNr, Rechnungsdatum, Rechnungsstatus, Rechnungsbe
 INSERT INTO Rechnungen(RechnungsNr, Rechnungsdatum, Rechnungsstatus, Rechnungsbetrag, Zahlungseingang, BelegungsNr)
     VALUES(2, '26.02.2016', 'offen', 549, null, 4);
 
-/*Relation kalkulierte_Distanz
-Hier unbedingt klären ob überhaupt notwendig bei den nicht kalkulierten Tupeln */
+/*Relation kalkulierte_Distanz*/
 INSERT INTO kalkulierte_Distanz (Startpunkt, Endpunkt, kalkulierte_Distanz)
 	VALUES(1, 4, 180);
 INSERT INTO kalkulierte_Distanz (Startpunkt, Endpunkt, kalkulierte_Distanz)
