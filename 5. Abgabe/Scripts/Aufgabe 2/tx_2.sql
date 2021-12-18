@@ -6,6 +6,7 @@ SET
 WHERE
     KundenID = 1
     ;
+    
 UPDATE Adressen
 SET
     Strasse = 'Schlossstrasse',
