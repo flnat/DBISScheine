@@ -4,6 +4,7 @@ CREATE TABLE STORNIERUNGEN(
     Stornierungsdatum DATE
         NOT NULL,
     BuchungsNr INTEGER
+        NOT NULL
         CONSTRAINT AK_STORNIERUNGEN_BUCHUNGSNR UNIQUE,
     BUCHUNGSDATUM DATE
         NOT NULL,
@@ -18,7 +19,7 @@ CREATE TABLE STORNIERUNGEN(
         CONSTRAINT VV_Range_Status CHECK(Status IN ('bezahlt', 'offen')),
     KUNDENID INTEGER
         NOT NULL,
-    Kundenname VARCHAR(32)
+    Kundenname VARCHAR2(32)
         NOT NULL,
     WOHNUNGSID INTEGER
         NOT NULL,
