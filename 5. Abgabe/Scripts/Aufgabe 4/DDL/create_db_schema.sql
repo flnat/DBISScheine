@@ -1,10 +1,10 @@
 ALTER SESSION SET NLS_DATE_FORMAT = 'DD.MM.YYYY';
 /*
-Legende fï¿½r Abkï¿½rzungen
+Legende für Abkürzungen
 PK: Primary-Key
 FK: Foreign-Key
 AK: Alternate-Key
-VV: Valid Values (fï¿½r CHECK Constraints)
+VV: Valid Values (für CHECK Constraints)
 */
 
 
@@ -251,11 +251,11 @@ CREATE TABLE Belegungen
     );
 
 
-/* Es ist nur eine Umwandlung von unverbindlichen Reservierungen zu verbindlichen Buchungen mï¿½glich  */
-/* Die Belegungen einer Ferienwohnung dï¿½rfen sich nicht zeitlich ï¿½berschneiden */
+/* Es ist nur eine Umwandlung von unverbindlichen Reservierungen zu verbindlichen Buchungen möglich  */
+/* Die Belegungen einer Ferienwohnung dürfen sich nicht zeitlich überschneiden */
 
 
-/*Eine Belegung fï¿½hrt nach einer Woche zu einer Rechnung */
+/*Eine Belegung führt nach einer Woche zu einer Rechnung */
 
 
 CREATE TABLE Rechnungen
@@ -274,13 +274,12 @@ CREATE TABLE Rechnungen
         NOT NULL
         CONSTRAINT FK_Rechnungen_Belegungen REFERENCES Belegungen(BelegungsNr)
             ON DELETE CASCADE
-            DEFERRABLE INITIALLY DEFERRED
         CONSTRAINT AK_Rechnungen_BelegungsNr UNIQUE,
     CONSTRAINT Rechnungen_Zahlungseingang_nach_Rechnungseingang CHECK(ZAHLUNGSEINGANG >= RECHNUNGSDATUM)
     );
 
 /*Da die Rechnungaustellung eine Woche nach erfolgter Buchung erfolgt, muss das Rechnungsdatum um 7 Tage groesser als 
-das Buchungsdatum. Implementierung erfolgt spï¿½ter.*/
+das Buchungsdatum. Implementierung erfolgt später.*/
 
 CREATE TABLE STORNIERUNGEN(
     StornierungsID INTEGER
@@ -298,9 +297,9 @@ CREATE TABLE STORNIERUNGEN(
     Buchungswert NUMBER(10,4)
         NOT NULL
         CONSTRAINT VV_positive_Buchungswert CHECK (Buchungswert > 0),
-    Status VARCHAR2(9)
+    Status VARCHAR2(7)
         NOT NULL,
-        CONSTRAINT VV_Range_Status CHECK(Status IN ('beglichen', 'offen')),
+        CONSTRAINT VV_Range_Status CHECK(Status IN ('bezahlt', 'offen')),
     KUNDENID INTEGER
         NOT NULL,
     Kundenname VARCHAR2(32)
@@ -308,9 +307,7 @@ CREATE TABLE STORNIERUNGEN(
     WOHNUNGSID INTEGER
         NOT NULL,
     BESCHREIBUNG VARCHAR2(1024)
-        NOT NULL,
-    CONSTRAINT Stornierungsdatum_nach_Buchungsdatum CHECK (Stornierungsdatum >= Buchungsdatum)  
-    )
+        NOT NULL)
 ;
 
 
@@ -364,7 +361,7 @@ CREATE OR REPLACE VIEW UebersichtKunden (KundenID, Nachname, Vorname, Email, IBA
         k.AdressID = a.AdressID AND
         a.OrtsID = o.OrtsID
         ;
-CREATE OR REPLACE VIEW Zahlungstatus (BelegungsNr, WohnungsID, Beschreibungstext, KundenID,
+CREATE OR REPLACE VIEW Zahlungsstatus (BelegungsNr, WohnungsID, Beschreibungstext, KundenID,
 Nachname, Vorname, RechnungsNr, Rechnungsdatum, Rechnungsbetrag, Zahlungsstatus, Zahlungseingang) AS
     SELECT b.BelegungsNr, f.WohnungsID, f.Beschreibungstext,
     k.KundenID, k.Nachname, k.Vorname,
@@ -407,5 +404,3 @@ CREATE OR REPLACE FUNCTION preis(Dauer integer, FerienwohnungsID integer) RETURN
         price := price_daily * Dauer;
         RETURN(price);
     END;
- 
-    
