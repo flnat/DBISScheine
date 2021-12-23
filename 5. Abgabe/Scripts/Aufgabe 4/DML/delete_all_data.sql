@@ -1,8 +1,10 @@
+DELETE FROM Stornierungen;
 DELETE FROM Rechnungen;
 DELETE FROM Belegungen;
 DELETE FROM Bilder;
 DELETE FROM bietet;
 DELETE FROM Zusatzaustattungen;
+DELETE FROM Ferienwohnungen;
 DELETE FROM Ferienwohnungen;
 DELETE FROM Kunden;
 DELETE FROM Bankverbindungen;
