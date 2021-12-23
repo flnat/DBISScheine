@@ -1,4 +1,4 @@
-DROP TRIGGER Buchungsstorno;
+DROP TRIGGER Archiviere_Stornierte_Buchungen;
 DROP FUNCTION Preis;
 DROP SEQUENCE STORNIERUNGSNUMMER;
 
@@ -6,7 +6,7 @@ DROP VIEW Buchung;
 DROP VIEW Reservierung;
 DROP VIEW Familienwohnungen;
 DROP VIEW UebersichtKunden;
-DROP VIEW Zahlungsstatus;
+DROP VIEW Zahlungstatus;
 DROP VIEW MidAgeKunden;
 
 DROP TABLE Stornierungen;
